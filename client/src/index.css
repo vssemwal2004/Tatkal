@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --tatkal-bg: #050816;
+  --tatkal-panel: rgba(10, 18, 34, 0.72);
+  --tatkal-border: rgba(148, 163, 184, 0.14);
+}
+
+body {
+  @apply bg-slate-950 text-slate-100 antialiased;
+  margin: 0;
+  font-family: "Sora", "Poppins", "Segoe UI", sans-serif;
+  background-image:
+    radial-gradient(circle at 10% 20%, rgba(34, 211, 238, 0.12), transparent 28%),
+    radial-gradient(circle at 85% 10%, rgba(59, 130, 246, 0.2), transparent 32%),
+    radial-gradient(circle at 50% 100%, rgba(16, 185, 129, 0.08), transparent 26%),
+    linear-gradient(180deg, #040814 0%, #08101f 52%, #04070f 100%);
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.glass-card {
+  @apply border backdrop-blur-sm;
+  background: var(--tatkal-panel);
+  border-color: var(--tatkal-border);
+}
+
+.fade-rise {
+  animation: fade-rise 0.45s ease-out both;
+}
+
+.input-field {
+  @apply w-full rounded-2xl border border-slate-700/80 bg-slate-950/80 px-4 py-3 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/10;
+}
+
+.primary-button {
+  @apply inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-brand-500 to-cyan-400 px-5 py-3 text-sm font-semibold text-white transition hover:brightness-110;
+}
+
+.secondary-button {
+  @apply inline-flex items-center justify-center rounded-2xl border px-5 py-3 text-sm font-semibold transition;
+}
+
+.tatkal-shell {
+  @apply border border-white/10 bg-slate-950/70 shadow-glow backdrop-blur-sm;
+}
+
+.tatkal-grid {
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-position: center;
+}
+
+.field-base {
+  @apply w-full rounded-2xl border border-slate-700/80 bg-slate-950/80 px-4 py-3 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/10;
+}
+
+.button-primary {
+  @apply inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-brand-500 to-cyan-400 px-5 py-3 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60;
+}
+
+.button-secondary {
+  @apply inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-slate-100 transition hover:border-cyan-400/30 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(34, 211, 238, 0.45) rgba(15, 23, 42, 0.4);
+}
+
+@keyframes fade-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
