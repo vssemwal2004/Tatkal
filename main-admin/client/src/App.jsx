@@ -6,6 +6,7 @@ import DashboardPage from './pages/DashboardPage';
 import DeploymentsPage from './pages/DeploymentsPage';
 import LoginPage from './pages/LoginPage';
 import ManagementPage from './pages/ManagementPage';
+import RegisterPage from './pages/RegisterPage';
 import RequestDetailsPage from './pages/RequestDetailsPage';
 import RequestsPage from './pages/RequestsPage';
 import SettingsPage from './pages/SettingsPage';
@@ -13,6 +14,7 @@ import SettingsPage from './pages/SettingsPage';
 const App = () => (
   <Routes>
     <Route path="/login" element={<LoginPage />} />
+    <Route path="/register" element={<RegisterPage />} />
 
     <Route element={<ProtectedRoute />}>
       <Route element={<AdminLayout />}>

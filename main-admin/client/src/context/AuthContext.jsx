@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { loginAdmin } from '../services/authService';
+import { loginAccount } from '../services/authService';
 import { setUnauthorizedHandler } from '../services/api';
 
 const AuthContext = createContext(null);
@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     setLoading(true);
     try {
-      const response = await loginAdmin(email, password);
+      const response = await loginAccount({ email, password, role: 'admin' });
       localStorage.setItem('tatkal_token', response.token);
       localStorage.setItem('tatkal_user', JSON.stringify(response.user));
       setToken(response.token);
