@@ -1,0 +1,74 @@
+import { useEffect, useState } from 'react';
+
+import ClientCard from '../components/ClientCard';
+import EmptyState from '../components/EmptyState';
+import PageHeader from '../components/PageHeader';
+import { fetchClients } from '../services/clientService';
+
+const ManagementPage = () => {
+  const [clients, setClients] = useState([]);
+  const [query, setQuery] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const loadClients = async () => {
+      try {
+        const data = await fetchClients();
+        setClients(data);
+      } catch (err) {
+        console.error('Failed to fetch clients:', err);
+        setError(err.response?.data?.message || 'Unable to load clients.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadClients();
+  }, []);
+
+  const filteredClients = clients.filter((client) => {
+    const text = `${client.name} ${client.clientId} ${client.businessType} ${client.status}`.toLowerCase();
+    return text.includes(query.toLowerCase());
+  });
+
+  return (
+    <section className="space-y-6 fade-rise">
+      <PageHeader
+        eyebrow="Client Registry"
+        title="Client Management"
+        description="Monitor every onboarded client, request status, and assigned deployment system from a single view."
+        action={
+          <input
+            type="text"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search clients..."
+            className="input-field w-full min-w-[16rem]"
+          />
+        }
+      />
+
+      {loading ? <p className="text-slate-400">Loading clients...</p> : null}
+      {error ? <p className="rounded-2xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm text-red-200">{error}</p> : null}
+      {!loading && !filteredClients.length ? (
+        <EmptyState
+          title={clients.length ? 'No matching clients' : 'No clients found'}
+          description={
+            clients.length
+              ? 'Try a broader search to find the client you need.'
+              : 'Client records will appear here after onboarding and request submission.'
+          }
+        />
+      ) : null}
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {filteredClients.map((client) => (
+          <ClientCard key={client.clientId} client={client} />
+        ))}
+      </div>
+    </section>
+  );
+};
+
+export default ManagementPage;
