@@ -1,3 +1,4 @@
+import { BusFront, CalendarDays } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -9,12 +10,14 @@ const businessCards = [
   {
     id: 'travel',
     title: 'Travel Booking',
-    description: 'Full guided builder flow for dashboards, seat maps, payments, and booking history.'
+    description: 'Perfect for buses, routes, seats, and travel checkout journeys.',
+    icon: BusFront
   },
   {
     id: 'event',
     title: 'Event Booking',
-    description: 'Preview-friendly event booking configuration using the same guided UI builder.'
+    description: 'Uses the same studio flow with event-oriented seat and ticket styling.',
+    icon: CalendarDays
   }
 ];
 
@@ -38,14 +41,15 @@ const BusinessTypePage = () => {
     <div className="min-h-screen">
       <AppHeader />
 
-      <main className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
-        <div className="grid gap-10 lg:grid-cols-[0.75fr_1.25fr]">
-          <div className="tatkal-shell rounded-[34px] p-7">
-            <p className="text-xs uppercase tracking-[0.28em] text-flame-400">Project Setup</p>
-            <h1 className="mt-4 text-4xl font-bold text-white">Define the business and project identity.</h1>
-            <div className="mt-8 space-y-4">
-              <label className="block space-y-2">
-                <span className="text-sm font-medium text-slate-200">Platform name</span>
+      <main className="client-shell">
+        <div className="grid gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
+          <section className="tatkal-shell rounded-[28px] p-5">
+            <p className="client-section-title">Project Setup</p>
+            <h1 className="mt-2 text-2xl font-semibold text-white">Set the basics before you start designing.</h1>
+
+            <div className="mt-6 space-y-4">
+              <label className="block space-y-1.5">
+                <span className="text-xs font-medium uppercase tracking-[0.18em] text-slate-400">Platform Name</span>
                 <input
                   className="field-base"
                   onChange={(event) => updateProject({ projectName: event.target.value })}
@@ -53,8 +57,8 @@ const BusinessTypePage = () => {
                   value={builderState.project.projectName}
                 />
               </label>
-              <label className="block space-y-2">
-                <span className="text-sm font-medium text-slate-200">Owner name</span>
+              <label className="block space-y-1.5">
+                <span className="text-xs font-medium uppercase tracking-[0.18em] text-slate-400">Owner Name</span>
                 <input
                   className="field-base"
                   onChange={(event) => updateProject({ ownerName: event.target.value })}
@@ -62,8 +66,8 @@ const BusinessTypePage = () => {
                   value={builderState.project.ownerName || client?.name || ''}
                 />
               </label>
-              <label className="block space-y-2">
-                <span className="text-sm font-medium text-slate-200">Contact email</span>
+              <label className="block space-y-1.5">
+                <span className="text-xs font-medium uppercase tracking-[0.18em] text-slate-400">Contact Email</span>
                 <input
                   className="field-base"
                   onChange={(event) => updateProject({ contactEmail: event.target.value })}
@@ -73,49 +77,55 @@ const BusinessTypePage = () => {
                 />
               </label>
             </div>
-            <div className="mt-6 rounded-[24px] border border-white/8 bg-white/5 p-4">
-              <p className="text-xs uppercase tracking-[0.24em] text-slate-500">Client ID</p>
-              <p className="mt-2 font-mono text-sm text-slate-200">{builderState.project.clientId}</p>
+
+            <div className="client-input-card mt-5">
+              <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Client ID</p>
+              <p className="mt-2 break-all font-mono text-sm text-slate-200">{builderState.project.clientId}</p>
             </div>
+
             {error ? <p className="mt-4 text-sm text-rose-300">{error}</p> : null}
-            <button className="button-primary mt-8 w-full" onClick={handleContinue} type="button">
+
+            <button className="button-primary mt-6 w-full" onClick={handleContinue} type="button">
               Continue to Builder
             </button>
-          </div>
+          </section>
 
-          <div>
-            <p className="text-xs uppercase tracking-[0.28em] text-aurora-300">Business Type</p>
-            <h2 className="mt-4 text-4xl font-bold text-white">Choose the booking experience you want to design.</h2>
-            <div className="mt-8 grid gap-5 md:grid-cols-2">
+          <section>
+            <p className="client-section-title">Business Type</p>
+            <h2 className="mt-2 text-3xl font-semibold text-white">Pick the booking experience you want to build.</h2>
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
               {businessCards.map((card) => {
+                const Icon = card.icon;
                 const isSelected = builderState.project.businessType === card.id;
 
                 return (
                   <button
-                    className={`rounded-[32px] border p-7 text-left transition ${
+                    className={`client-card p-5 text-left transition ${
                       isSelected
                         ? 'border-aurora-400/40 bg-aurora-500/10 shadow-glow'
-                        : 'border-white/10 bg-white/5 hover:border-white/20'
+                        : 'hover:border-white/20 hover:bg-white/[0.06]'
                     }`}
                     key={card.id}
                     onClick={() => updateProject({ businessType: card.id })}
                     type="button"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-xs uppercase tracking-[0.24em] text-slate-400">Template</span>
+                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/[0.05] text-aurora-300">
+                        <Icon className="h-5 w-5" />
+                      </div>
                       {isSelected ? (
-                        <span className="rounded-full bg-aurora-500/15 px-3 py-1 text-xs font-semibold text-aurora-300">
+                        <span className="rounded-full border border-aurora-400/20 bg-aurora-500/10 px-3 py-1 text-[11px] uppercase tracking-[0.22em] text-aurora-200">
                           Selected
                         </span>
                       ) : null}
                     </div>
-                    <h3 className="mt-6 text-3xl font-bold text-white">{card.title}</h3>
-                    <p className="mt-4 leading-7 text-slate-300">{card.description}</p>
+                    <h3 className="mt-6 text-xl font-semibold text-white">{card.title}</h3>
+                    <p className="mt-3 text-sm leading-7 text-slate-400">{card.description}</p>
                   </button>
                 );
               })}
             </div>
-          </div>
+          </section>
         </div>
       </main>
     </div>

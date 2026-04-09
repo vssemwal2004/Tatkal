@@ -1,18 +1,18 @@
 import { readFileAsDataUrl } from '../utils/fileHelpers';
 
 export const ControlSection = ({ title, subtitle, children }) => (
-  <section className="tatkal-shell rounded-[28px] p-5">
+  <section className="client-card p-4">
     <div className="mb-4">
-      <h3 className="text-lg font-semibold text-white">{title}</h3>
-      {subtitle ? <p className="mt-1 text-sm text-slate-400">{subtitle}</p> : null}
+      <h3 className="text-sm font-semibold text-white">{title}</h3>
+      {subtitle ? <p className="mt-1 text-xs leading-5 text-slate-400">{subtitle}</p> : null}
     </div>
-    <div className="space-y-4">{children}</div>
+    <div className="space-y-3">{children}</div>
   </section>
 );
 
 export const TextField = ({ label, value, onChange, placeholder, type = 'text' }) => (
-  <label className="block space-y-2">
-    <span className="text-sm font-medium text-slate-200">{label}</span>
+  <label className="block space-y-1.5">
+    <span className="text-xs font-medium uppercase tracking-[0.18em] text-slate-400">{label}</span>
     <input
       className="field-base"
       onChange={(event) => onChange(event.target.value)}
@@ -24,30 +24,30 @@ export const TextField = ({ label, value, onChange, placeholder, type = 'text' }
 );
 
 export const ToggleField = ({ label, description, checked, onChange }) => (
-  <label className="flex items-start justify-between gap-4 rounded-2xl border border-white/8 bg-white/5 px-4 py-3">
-    <div>
+  <label className="flex items-start justify-between gap-3 rounded-xl border border-white/8 bg-white/[0.03] px-3 py-3">
+    <div className="min-w-0">
       <p className="text-sm font-medium text-slate-100">{label}</p>
-      {description ? <p className="mt-1 text-xs text-slate-400">{description}</p> : null}
+      {description ? <p className="mt-1 text-xs leading-5 text-slate-500">{description}</p> : null}
     </div>
     <button
-      className={`relative mt-1 h-7 w-12 rounded-full transition ${checked ? 'bg-aurora-500' : 'bg-slate-700'}`}
+      className={`relative mt-0.5 h-6 w-11 rounded-full transition ${checked ? 'bg-aurora-500' : 'bg-slate-700'}`}
       onClick={(event) => {
         event.preventDefault();
         onChange(!checked);
       }}
       type="button"
     >
-      <span className={`absolute top-1 h-5 w-5 rounded-full bg-white transition ${checked ? 'left-6' : 'left-1'}`} />
+      <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition ${checked ? 'left-5.5' : 'left-0.5'}`} />
     </button>
   </label>
 );
 
 export const ColorField = ({ label, value, onChange }) => (
-  <label className="block space-y-2">
-    <span className="text-sm font-medium text-slate-200">{label}</span>
-    <div className="flex items-center gap-3 rounded-2xl border border-white/8 bg-white/5 p-3">
+  <label className="block space-y-1.5">
+    <span className="text-xs font-medium uppercase tracking-[0.18em] text-slate-400">{label}</span>
+    <div className="flex items-center gap-2 rounded-xl border border-white/8 bg-white/[0.03] p-2">
       <input
-        className="h-11 w-14 rounded-xl border border-white/10 bg-transparent"
+        className="h-10 w-12 rounded-lg border border-white/10 bg-transparent"
         onChange={(event) => onChange(event.target.value)}
         type="color"
         value={normalizeColorValue(value)}
@@ -59,9 +59,9 @@ export const ColorField = ({ label, value, onChange }) => (
 
 export const RangeField = ({ label, min, max, step = 1, value, unit = '', onChange }) => (
   <label className="block space-y-2">
-    <div className="flex items-center justify-between text-sm">
-      <span className="font-medium text-slate-200">{label}</span>
-      <span className="text-slate-400">
+    <div className="flex items-center justify-between text-xs uppercase tracking-[0.18em] text-slate-400">
+      <span>{label}</span>
+      <span>
         {value}
         {unit}
       </span>
@@ -79,8 +79,8 @@ export const RangeField = ({ label, min, max, step = 1, value, unit = '', onChan
 );
 
 export const SelectField = ({ label, value, onChange, options, disabled = false }) => (
-  <label className="block space-y-2">
-    <span className="text-sm font-medium text-slate-200">{label}</span>
+  <label className="block space-y-1.5">
+    <span className="text-xs font-medium uppercase tracking-[0.18em] text-slate-400">{label}</span>
     <select className="field-base" disabled={disabled} onChange={(event) => onChange(event.target.value)} value={value}>
       {options.map((option) => (
         <option key={option.value} value={option.value}>
@@ -92,9 +92,9 @@ export const SelectField = ({ label, value, onChange, options, disabled = false 
 );
 
 export const FileUploadField = ({ label, value, onChange, helper }) => (
-  <label className="block space-y-2">
-    <span className="text-sm font-medium text-slate-200">{label}</span>
-    <div className="rounded-2xl border border-dashed border-white/15 bg-white/4 p-4">
+  <label className="block space-y-1.5">
+    <span className="text-xs font-medium uppercase tracking-[0.18em] text-slate-400">{label}</span>
+    <div className="rounded-xl border border-dashed border-white/15 bg-white/[0.03] p-3">
       <input
         className="field-base"
         onChange={async (event) => {
@@ -109,10 +109,10 @@ export const FileUploadField = ({ label, value, onChange, helper }) => (
         }}
         type="file"
       />
-      {helper ? <p className="mt-2 text-xs text-slate-500">{helper}</p> : null}
+      {helper ? <p className="mt-2 text-[11px] leading-5 text-slate-500">{helper}</p> : null}
       {value ? (
-        <div className="mt-3 overflow-hidden rounded-2xl border border-white/10 bg-slate-950/70 p-2">
-          <img alt={label} className="h-20 w-full rounded-xl object-cover" src={value} />
+        <div className="mt-3 overflow-hidden rounded-xl border border-white/10 bg-slate-950/70 p-2">
+          <img alt={label} className="h-16 w-full rounded-lg object-cover" src={value} />
         </div>
       ) : null}
     </div>

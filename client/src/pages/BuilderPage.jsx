@@ -1,3 +1,4 @@
+import { CheckCircle2, ChevronLeft, ChevronRight, Eye, LayoutPanelLeft, Save, SendHorizonal } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -18,6 +19,49 @@ import { useBuilder } from '../context/BuilderContext';
 import { fetchDesign, saveDesign } from '../services/designService';
 import { rememberTrackingId } from '../services/builderStorage';
 
+const steps = [
+  {
+    id: 'loginPage',
+    short: 'Login',
+    label: 'Login Page',
+    summary: 'Configure the welcome screen, logo, fields, and text styling.',
+    BuilderComponent: LoginBuilder,
+    PreviewComponent: LoginPreview
+  },
+  {
+    id: 'dashboard',
+    short: 'Dashboard',
+    label: 'Dashboard',
+    summary: 'Adjust the search hero, card size, labels, and visual tone.',
+    BuilderComponent: DashboardBuilder,
+    PreviewComponent: DashboardPreview
+  },
+  {
+    id: 'seatSelection',
+    short: 'Seats',
+    label: 'Seat Selection',
+    summary: 'Set the layout and booking state colors for seats or ticket zones.',
+    BuilderComponent: SeatBuilder,
+    PreviewComponent: SeatPreview
+  },
+  {
+    id: 'payment',
+    short: 'Payment',
+    label: 'Payment',
+    summary: 'Shape the payment page theme, button style, and visible options.',
+    BuilderComponent: PaymentBuilder,
+    PreviewComponent: PaymentPreview
+  },
+  {
+    id: 'history',
+    short: 'History',
+    label: 'History',
+    summary: 'Choose a clean history layout and refine the table or card styling.',
+    BuilderComponent: HistoryBuilder,
+    PreviewComponent: HistoryPreview
+  }
+];
+
 const BuilderPage = () => {
   const navigate = useNavigate();
   const { client } = useAuth();
@@ -28,44 +72,6 @@ const BuilderPage = () => {
   const [submitState, setSubmitState] = useState('idle');
   const [submitError, setSubmitError] = useState('');
   const [hydrated, setHydrated] = useState(false);
-
-  const steps = [
-    {
-      id: 'loginPage',
-      label: 'Login Page',
-      summary: 'Configure sign-in fields, signup visibility, logo, and theme.',
-      BuilderComponent: LoginBuilder,
-      PreviewComponent: LoginPreview
-    },
-    {
-      id: 'dashboard',
-      label: 'Dashboard',
-      summary: 'Control dashboard layout, background, search content, and CTA styling.',
-      BuilderComponent: DashboardBuilder,
-      PreviewComponent: DashboardPreview
-    },
-    {
-      id: 'seatSelection',
-      label: 'Seat Selection',
-      summary: 'Customize the booking availability palette and seat arrangement.',
-      BuilderComponent: SeatBuilder,
-      PreviewComponent: SeatPreview
-    },
-    {
-      id: 'payment',
-      label: 'Payment',
-      summary: 'Shape the checkout theme, methods, and payment CTA look.',
-      BuilderComponent: PaymentBuilder,
-      PreviewComponent: PaymentPreview
-    },
-    {
-      id: 'history',
-      label: 'History',
-      summary: 'Decide between table and card history views with custom styling.',
-      BuilderComponent: HistoryBuilder,
-      PreviewComponent: HistoryPreview
-    }
-  ];
 
   const currentStep = steps[activeStep];
   const CurrentBuilder = currentStep.BuilderComponent;
@@ -92,7 +98,7 @@ const BuilderPage = () => {
     };
 
     loadExistingDesign();
-  }, [client?.clientId]);
+  }, [client?.clientId, replaceBuilderState]);
 
   useEffect(() => {
     if (!hydrated || !builderState.project.clientId) {
@@ -155,77 +161,86 @@ const BuilderPage = () => {
     <div className="min-h-screen">
       <AppHeader />
 
-      <main className="mx-auto max-w-[1600px] px-5 py-8 sm:px-8">
-        <section className="mb-8 flex flex-col gap-4 rounded-[34px] border border-white/8 bg-white/[0.03] p-6 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-[0.28em] text-aurora-300">Builder Workspace</p>
-            <h1 className="mt-3 text-4xl font-bold text-white">{builderState.project.projectName || 'Untitled Project'}</h1>
-            <p className="mt-2 text-slate-300">
-              {builderState.project.businessType === 'event' ? 'Event booking' : 'Travel booking'} platform configured as structured JSON.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <StatusBadge value={submitState === 'submitted' ? 'pending' : saveState === 'error' ? 'pending' : 'pending'} />
-            <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300">
-              {saveState === 'saving' && 'Auto-saving draft...'}
-              {saveState === 'saved' && `Saved at ${lastSavedAt}`}
-              {saveState === 'error' && 'Auto-save failed'}
-              {saveState === 'idle' && 'Autosave ready'}
+      <main className="mx-auto max-w-[1380px] px-4 py-6 sm:px-6 lg:px-8">
+        <section className="client-card p-5 sm:p-6">
+          <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+            <div>
+              <p className="client-section-title">Platform Studio</p>
+              <h1 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">
+                {builderState.project.projectName || 'Untitled Platform'}
+              </h1>
+              <p className="mt-2 text-sm leading-7 text-slate-400">
+                A cleaner editor for your {builderState.project.businessType === 'event' ? 'event' : 'travel'} booking
+                platform with live preview and automatic draft saving.
+              </p>
             </div>
-            <button className="button-secondary" onClick={() => navigate('/client/track')} type="button">
-              Track My Project
-            </button>
+
+            <div className="grid gap-3 sm:grid-cols-3">
+              <StudioStat
+                icon={CheckCircle2}
+                label="Business Type"
+                value={builderState.project.businessType === 'event' ? 'Event' : 'Travel'}
+              />
+              <StudioStat icon={Save} label="Draft Status" value={formatSaveLabel(saveState, lastSavedAt)} />
+              <StudioStat icon={Eye} label="Preview" value="Live Sync" />
+            </div>
+          </div>
+
+          <div className="mt-5 flex gap-2 overflow-x-auto pb-1">
+            {steps.map((step, index) => {
+              const isActive = index === activeStep;
+
+              return (
+                <button
+                  key={step.id}
+                  type="button"
+                  onClick={() => setActiveStep(index)}
+                  className={`client-tab min-w-[132px] ${isActive ? 'client-tab-active' : 'client-tab-idle'}`}
+                >
+                  <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Step {index + 1}</p>
+                  <p className="mt-1 text-sm font-semibold">{step.short}</p>
+                </button>
+              );
+            })}
           </div>
         </section>
 
-        <section className="mb-6 grid gap-3 lg:grid-cols-5">
-          {steps.map((step, index) => {
-            const isActive = index === activeStep;
+        <section className="mt-6 grid gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
+          <aside className="xl:sticky xl:top-24">
+            <div className="space-y-4 xl:max-h-[calc(100vh-7rem)] xl:overflow-y-auto xl:pr-1">
+              <div className="tatkal-shell rounded-[24px] p-4">
+                <div className="flex items-center gap-2">
+                  <LayoutPanelLeft className="h-4 w-4 text-aurora-300" />
+                  <p className="client-section-title">Current Step</p>
+                </div>
+                <h2 className="mt-2 text-xl font-semibold text-white">{currentStep.label}</h2>
+                <p className="mt-2 text-sm leading-6 text-slate-400">{currentStep.summary}</p>
+              </div>
 
-            return (
-              <button
-                className={`rounded-[24px] border px-4 py-4 text-left transition ${
-                  isActive
-                    ? 'border-aurora-400/40 bg-aurora-500/10 text-white shadow-glow'
-                    : 'border-white/10 bg-white/5 text-slate-300 hover:border-white/20'
-                }`}
-                key={step.id}
-                onClick={() => setActiveStep(index)}
-                type="button"
-              >
-                <p className="text-xs uppercase tracking-[0.24em] text-slate-500">Phase {index + 1}</p>
-                <p className="mt-2 text-lg font-semibold">{step.label}</p>
-              </button>
-            );
-          })}
-        </section>
-
-        <section className="grid gap-6 xl:grid-cols-[430px_minmax(0,1fr)]">
-          <div className="space-y-5">
-            <div className="tatkal-shell rounded-[30px] p-5">
-              <p className="text-xs uppercase tracking-[0.24em] text-flame-400">Current Phase</p>
-              <h2 className="mt-3 text-3xl font-bold text-white">{currentStep.label}</h2>
-              <p className="mt-3 leading-7 text-slate-300">{currentStep.summary}</p>
+              <CurrentBuilder
+                businessType={builderState.project.businessType}
+                config={builderState[currentStep.id]}
+                updateSection={(value) => updateSection(currentStep.id, value)}
+              />
             </div>
-            <CurrentBuilder
-              businessType={builderState.project.businessType}
-              config={builderState[currentStep.id]}
-              updateSection={(value) => updateSection(currentStep.id, value)}
-            />
-          </div>
+          </aside>
 
-          <div className="space-y-5">
+          <div className="space-y-4">
             <CurrentPreview config={builderState[currentStep.id]} project={builderState.project} />
 
-            <div className="tatkal-shell rounded-[30px] p-5">
+            <div className="tatkal-shell rounded-[24px] p-4">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.24em] text-slate-500">Builder Actions</p>
-                  <p className="mt-2 text-slate-300">Move through phases, then submit the full configuration to admin.</p>
+                  <p className="client-section-title">Actions</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-400">
+                    Move through each step, keep refining your screens, and submit when the platform looks right.
+                  </p>
                   {submitError ? <p className="mt-2 text-sm text-rose-300">{submitError}</p> : null}
                 </div>
-                <div className="flex flex-wrap gap-3">
+
+                <div className="flex flex-wrap gap-2">
                   <button className="button-secondary" disabled={activeStep === 0} onClick={() => goToStep(-1)} type="button">
+                    <ChevronLeft className="mr-1 h-4 w-4" />
                     Previous
                   </button>
                   <button
@@ -235,9 +250,11 @@ const BuilderPage = () => {
                     type="button"
                   >
                     Next
+                    <ChevronRight className="ml-1 h-4 w-4" />
                   </button>
                   <button className="button-primary" onClick={handleSubmit} type="button">
-                    {submitState === 'submitting' ? 'Submitting...' : 'Submit & Generate Platform'}
+                    <SendHorizonal className="mr-2 h-4 w-4" />
+                    {submitState === 'submitting' ? 'Submitting...' : 'Submit Platform'}
                   </button>
                 </div>
               </div>
@@ -247,6 +264,29 @@ const BuilderPage = () => {
       </main>
     </div>
   );
+};
+
+const StudioStat = ({ icon: Icon, label, value }) => (
+  <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
+    <div className="flex items-center gap-2 text-slate-400">
+      <Icon className="h-4 w-4 text-aurora-300" />
+      <span className="text-[11px] uppercase tracking-[0.2em]">{label}</span>
+    </div>
+    <p className="mt-2 text-sm font-semibold text-white">{value}</p>
+  </div>
+);
+
+const formatSaveLabel = (saveState, lastSavedAt) => {
+  if (saveState === 'saving') {
+    return 'Saving';
+  }
+  if (saveState === 'saved') {
+    return `Saved ${lastSavedAt}`;
+  }
+  if (saveState === 'error') {
+    return 'Retry needed';
+  }
+  return 'Autosave ready';
 };
 
 export default BuilderPage;

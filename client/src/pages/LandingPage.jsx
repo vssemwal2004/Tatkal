@@ -1,4 +1,4 @@
-import { ArrowRight, LayoutDashboard, LockKeyhole, Rocket, WandSparkles } from 'lucide-react';
+import { ArrowRight, BadgeCheck, LayoutTemplate, Rocket, Workflow } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import { useAuth } from '../context/AuthContext';
@@ -6,81 +6,79 @@ import { useAuth } from '../context/AuthContext';
 const LandingPage = () => {
   const { isAuthenticated, role } = useAuth();
 
-  const primaryLink = isAuthenticated ? (role === 'admin' ? '/admin' : '/client/builder-entry') : '/login';
-  const builderLink = isAuthenticated && role === 'client' ? '/client/builder-entry' : '/register';
+  const primaryLink = isAuthenticated ? (role === 'admin' ? '/admin' : '/client/builder-entry') : '/register';
+  const secondaryLink = isAuthenticated ? (role === 'admin' ? '/admin' : '/client/track') : '/login';
 
   return (
-    <main className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-7xl flex-col rounded-[2rem] border border-white/10 bg-slate-950/65 shadow-glow backdrop-blur">
-        <header className="flex items-center justify-between gap-4 border-b border-white/10 px-6 py-5 sm:px-8">
-          <div>
-            <p className="text-xs uppercase tracking-[0.32em] text-cyan-300/80">TATKAL</p>
-            <h1 className="mt-2 text-xl font-semibold text-white">Booking Platform Operating System</h1>
+    <main className="min-h-screen px-4 py-5 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl rounded-[32px] border border-white/10 bg-slate-950/75 shadow-[0_30px_100px_rgba(2,6,23,0.45)] backdrop-blur-xl">
+        <header className="flex items-center justify-between gap-4 border-b border-white/10 px-5 py-4 sm:px-8">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-aurora-400/30 bg-aurora-500/10 text-xs font-bold tracking-[0.22em] text-aurora-300">
+              TK
+            </div>
+            <div>
+              <p className="text-sm font-semibold tracking-[0.18em] text-white">TATKAL</p>
+              <p className="text-[10px] uppercase tracking-[0.26em] text-slate-500">Platform Builder</p>
+            </div>
           </div>
-          <Link to={primaryLink} className="primary-button">
-            {isAuthenticated ? 'Open Workspace' : 'Get Started'}
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link to={secondaryLink} className="button-secondary hidden sm:inline-flex">
+              {isAuthenticated ? 'Track Project' : 'Login'}
+            </Link>
+            <Link to={primaryLink} className="button-primary">
+              {isAuthenticated ? 'Open Workspace' : 'Design Your Platform'}
+            </Link>
+          </div>
         </header>
 
-        <section className="grid flex-1 gap-10 px-6 py-10 sm:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+        <section className="grid gap-10 px-5 py-10 sm:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:py-14">
           <div>
-            <p className="text-sm uppercase tracking-[0.28em] text-brand-300">Shared SaaS Platform</p>
-            <h2 className="mt-4 max-w-3xl text-4xl font-semibold leading-tight text-white sm:text-5xl">
-              Manage deployments on the admin side and design booking platforms on the client side.
-            </h2>
+            <span className="inline-flex items-center gap-2 rounded-full border border-aurora-400/20 bg-aurora-500/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.22em] text-aurora-200">
+              <BadgeCheck className="h-3.5 w-3.5" />
+              Client Experience Redesign
+            </span>
+            <h1 className="mt-5 max-w-3xl text-4xl font-semibold leading-tight text-white sm:text-5xl">
+              Build a polished booking platform with a guided studio that feels fast, clear, and professional.
+            </h1>
             <p className="mt-5 max-w-2xl text-base leading-8 text-slate-300">
-              TATKAL now supports the full loop: client registration, guided UI building, live preview, submission,
-              admin approval, and deployment tracking inside a single full-stack codebase.
+              TATKAL helps clients configure their platform screen by screen, preview every change instantly, submit the
+              final setup, and track deployment without leaving the same product.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link to={primaryLink} className="primary-button">
-                <span>{isAuthenticated ? 'Open Dashboard' : 'Get Started'}</span>
+              <Link to={primaryLink} className="button-primary">
+                <span>{isAuthenticated ? 'Go to Builder' : 'Start Builder'}</span>
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
-              <Link
-                to="/login"
-                className="secondary-button border-white/10 bg-white/5 text-slate-100 hover:border-cyan-400/30 hover:bg-white/10"
-              >
-                Login
+              <Link to="/client/track" className="button-secondary">
+                Track Project
               </Link>
             </div>
 
-            <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              <FeatureIcon icon={LayoutDashboard} title="Admin Control" text="Review requests, clients, and deployments." />
-              <FeatureIcon icon={WandSparkles} title="Client Builder" text="Design every screen with live config previews." />
-              <FeatureIcon icon={LockKeyhole} title="JWT Protected" text="Both roles are secured through shared auth." />
-              <FeatureIcon icon={Rocket} title="Deploy & Track" text="Generate URLs and track rollout status." />
+            <div className="mt-10 grid gap-3 sm:grid-cols-3">
+              <MetricCard value="5" label="guided steps" />
+              <MetricCard value="Live" label="screen preview" />
+              <MetricCard value="Shared" label="admin workflow" />
             </div>
           </div>
 
-          <div className="grid gap-4">
-            <article className="glass-card rounded-[1.75rem] p-6">
-              <p className="text-xs uppercase tracking-[0.24em] text-cyan-300/70">Admin</p>
-              <h3 className="mt-3 text-xl font-semibold text-white">Control Center</h3>
-              <p className="mt-3 text-sm leading-7 text-slate-400">
-                Monitor client demand, review JSON-driven platform requests, approve work, and deploy generated sites.
-              </p>
-            </article>
-
-            <article className="glass-card rounded-[1.75rem] p-6">
-              <p className="text-xs uppercase tracking-[0.24em] text-cyan-300/70">Design Your Platform</p>
-              <h3 className="mt-3 text-xl font-semibold text-white">Guided Client Builder</h3>
-              <p className="mt-3 text-sm leading-7 text-slate-400">
-                Clients can register, choose a platform type, customize five key screens, and submit directly to admin.
-              </p>
-              <Link to={builderLink} className="primary-button mt-6">
-                Start Builder
-              </Link>
-            </article>
-
-            <article className="glass-card rounded-[1.75rem] p-6">
-              <p className="text-xs uppercase tracking-[0.24em] text-cyan-300/70">Tracking</p>
-              <h3 className="mt-3 text-xl font-semibold text-white">Deployment Visibility</h3>
-              <p className="mt-3 text-sm leading-7 text-slate-400">
-                Submitted projects move through pending, approved, and deployed states with site URLs and credentials.
-              </p>
-            </article>
+          <div className="space-y-4">
+            <FeatureCard
+              icon={LayoutTemplate}
+              title="Design Your Platform"
+              text="Choose the booking type, tune the UI, and keep everything config-driven with no code editing."
+            />
+            <FeatureCard
+              icon={Workflow}
+              title="Submit with Confidence"
+              text="Auto-save keeps work safe while the final submit sends your latest design to the admin review queue."
+            />
+            <FeatureCard
+              icon={Rocket}
+              title="Track Deployment"
+              text="Once approved, your project shows deployment status, generated site URL, and credentials in one place."
+            />
           </div>
         </section>
       </div>
@@ -88,12 +86,25 @@ const LandingPage = () => {
   );
 };
 
-const FeatureIcon = ({ icon: Icon, title, text }) => (
-  <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-    <Icon className="h-5 w-5 text-cyan-300" />
-    <p className="mt-4 text-sm font-medium text-white">{title}</p>
-    <p className="mt-2 text-sm leading-6 text-slate-400">{text}</p>
+const MetricCard = ({ value, label }) => (
+  <div className="client-card p-4">
+    <p className="text-2xl font-semibold text-white">{value}</p>
+    <p className="mt-1 text-xs uppercase tracking-[0.22em] text-slate-500">{label}</p>
   </div>
+);
+
+const FeatureCard = ({ icon: Icon, title, text }) => (
+  <article className="client-card p-5">
+    <div className="flex items-start gap-4">
+      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/[0.05] text-aurora-300">
+        <Icon className="h-5 w-5" />
+      </div>
+      <div>
+        <h2 className="text-lg font-semibold text-white">{title}</h2>
+        <p className="mt-2 text-sm leading-7 text-slate-400">{text}</p>
+      </div>
+    </div>
+  </article>
 );
 
 export default LandingPage;

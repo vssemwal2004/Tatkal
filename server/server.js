@@ -26,6 +26,16 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ message: 'TATKAL admin backend is running' });
 });
 
+// If MongoDB is unavailable, block API calls (except health) with a clear 503.
+app.use('/api', (req, res, next) => {
+  if (req.path === '/health') return next();
+  if (app.locals.dbConnected) return next();
+  return res.status(503).json({
+    message:
+      'Database is not connected. Start MongoDB or update MONGO_URI in server/.env (or set SKIP_DB=true to silence DB connect attempts).'
+  });
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/design', verifyToken, designRoutes);
 app.use('/api/client', verifyToken, clientPortalRoutes);
@@ -37,8 +47,12 @@ app.use(notFound);
 app.use(errorHandler);
 
 const startServer = async () => {
-  await connectDB();
-  await ensureAdminUser();
+  app.locals.dbConnected = await connectDB();
+  if (app.locals.dbConnected) {
+    await ensureAdminUser();
+  } else {
+    console.warn('Starting backend without MongoDB; API routes will return 503 (except /api/health).');
+  }
 
   app.listen(PORT, () => {
     console.log(`Backend server is running on port ${PORT}`);
