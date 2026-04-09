@@ -19,3 +19,10 @@ export const approveRequest = async (clientId) => {
   const { data } = await api.patch(`/admin/request/${clientId}/approve`);
   return data;
 };
+
+export const exportClientZip = async (clientId) => {
+  const response = await api.post(`/admin/export/${clientId}`, {}, {
+    responseType: 'blob'
+  });
+  return response.data;
+};

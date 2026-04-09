@@ -5,7 +5,7 @@ import JsonSection from '../components/JsonSection';
 import PageHeader from '../components/PageHeader';
 import StatusBadge from '../components/StatusBadge';
 import { deploySystem } from '../services/deployService';
-import { approveRequest, fetchRequestDetails } from '../services/requestService';
+import { approveRequest, exportClientZip, fetchRequestDetails } from '../services/requestService';
 
 const RequestDetailsPage = () => {
   const { clientId } = useParams();
@@ -62,8 +62,25 @@ const RequestDetailsPage = () => {
 
     try {
       await approveRequest(clientId);
+
+      const zipBlob = await exportClientZip(clientId);
+      const zipUrl = window.URL.createObjectURL(zipBlob);
+      const anchor = document.createElement('a');
+      anchor.href = zipUrl;
+      anchor.download = `${clientId}-frontend.zip`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.URL.revokeObjectURL(zipUrl);
+
+      const deploymentResponse = await deploySystem({ clientId });
+      setDeploymentResult(deploymentResponse.deployment || null);
       await loadDetails();
-      setFeedback({ type: 'success', message: 'Request approved successfully.' });
+
+      setFeedback({
+        type: 'success',
+        message: deploymentResponse.message || 'Approved, ZIP downloaded, and deployment generated.'
+      });
     } catch (err) {
       setFeedback({ type: 'error', message: err.response?.data?.message || 'Approval failed.' });
     } finally {
