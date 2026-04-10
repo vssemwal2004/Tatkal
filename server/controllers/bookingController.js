@@ -1,5 +1,6 @@
 const Booking = require('../models/Booking');
 const SeatLock = require('../models/SeatLock');
+const Payment = require('../models/Payment');
 
 const lockSeat = async (req, res, next) => {
   try {
@@ -10,6 +11,24 @@ const lockSeat = async (req, res, next) => {
     }
 
     const now = new Date();
+    await SeatLock.deleteMany({
+      clientId,
+      routeId,
+      seatId,
+      status: 'locked',
+      expiresAt: { $lte: now }
+    });
+
+    const alreadyBooked = await Booking.findOne({
+      clientId,
+      routeId,
+      seatId,
+      status: 'confirmed'
+    }).lean();
+
+    if (alreadyBooked) {
+      return res.status(409).json({ message: 'Seat already booked' });
+    }
     const existing = await SeatLock.findOne({
       clientId,
       routeId,
@@ -23,13 +42,21 @@ const lockSeat = async (req, res, next) => {
     }
 
     const expiresAt = new Date(Date.now() + Number(holdMinutes) * 60 * 1000);
-    const lock = await SeatLock.create({
-      clientId,
-      routeId,
-      seatId,
-      userId: req.user.id,
-      expiresAt
-    });
+    let lock;
+    try {
+      lock = await SeatLock.create({
+        clientId,
+        routeId,
+        seatId,
+        userId: req.user.id,
+        expiresAt
+      });
+    } catch (error) {
+      if (error.code === 11000) {
+        return res.status(409).json({ message: 'Seat already locked' });
+      }
+      throw error;
+    }
 
     return res.status(200).json({
       message: 'Seat locked',
@@ -58,6 +85,28 @@ const confirmBooking = async (req, res, next) => {
       lock.status = 'expired';
       await lock.save();
       return res.status(400).json({ message: 'Seat lock expired' });
+    }
+
+    if (lock.userId.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'You do not own this seat lock' });
+    }
+
+    const alreadyBooked = await Booking.findOne({
+      clientId: lock.clientId,
+      routeId: lock.routeId,
+      seatId: lock.seatId,
+      status: 'confirmed'
+    }).lean();
+
+    if (alreadyBooked) {
+      return res.status(409).json({ message: 'Seat already booked' });
+    }
+
+    if (payment?.orderId) {
+      const paymentRecord = await Payment.findOne({ orderId: payment.orderId }).lean();
+      if (!paymentRecord || paymentRecord.status !== 'verified') {
+        return res.status(400).json({ message: 'Payment is not verified' });
+      }
     }
 
     lock.status = 'confirmed';
