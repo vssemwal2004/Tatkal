@@ -82,19 +82,19 @@ const DashboardPage = () => {
         <div className="glass-card rounded-3xl p-6">
           <div className="flex items-center gap-2">
             <Activity className="h-5 w-5 text-cyan-300" />
-            <h3 className="text-lg font-semibold text-slate-100">Request Pipeline</h3>
+            <h3 className="text-lg font-semibold text-slate-900">Request Pipeline</h3>
           </div>
           <p className="mt-2 text-sm text-slate-400">A quick read on the queue from pending review through approved rollout.</p>
 
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
             <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
               <p className="text-sm text-slate-400">Pending Review</p>
-              <p className="mt-3 text-3xl font-semibold text-white">{loading ? '...' : stats.pendingRequests}</p>
+              <p className="mt-3 text-3xl font-semibold text-slate-900">{loading ? '...' : stats.pendingRequests}</p>
               <p className="mt-2 text-sm text-slate-500">Waiting for approval inside the admin queue.</p>
             </div>
             <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
               <p className="text-sm text-slate-400">Approved Queue</p>
-              <p className="mt-3 text-3xl font-semibold text-white">{loading ? '...' : stats.approvedRequests}</p>
+              <p className="mt-3 text-3xl font-semibold text-slate-900">{loading ? '...' : stats.approvedRequests}</p>
               <p className="mt-2 text-sm text-slate-500">Ready for deployment and credential generation.</p>
             </div>
           </div>
@@ -112,7 +112,7 @@ const DashboardPage = () => {
         </div>
 
         <div className="glass-card rounded-3xl p-6">
-          <h3 className="text-lg font-semibold text-slate-100">Recent Activity</h3>
+          <h3 className="text-lg font-semibold text-slate-900">Recent Activity</h3>
           <p className="mt-2 text-sm text-slate-400">The latest client submissions flowing through the admin panel.</p>
 
           <div className="mt-5 space-y-4">

@@ -55,13 +55,13 @@ const AdminLayout = () => {
               <button
                 type="button"
                 onClick={() => setMobileOpen(true)}
-                className="inline-flex rounded-2xl border border-white/10 bg-white/5 p-2 text-slate-200 md:hidden"
+                className="inline-flex rounded-2xl border border-slate-200 bg-white p-2 text-slate-700 md:hidden"
               >
                 <Menu className="h-5 w-5" />
               </button>
               <div>
                 <p className="text-xs uppercase tracking-[0.22em] text-slate-400">TATKAL Admin</p>
-                <h1 className="text-xl font-semibold text-slate-100">{pageMeta.title}</h1>
+                <h1 className="text-xl font-semibold text-slate-900">{pageMeta.title}</h1>
               </div>
             </div>
             <p className="mt-2 max-w-2xl text-sm text-slate-400">{pageMeta.description}</p>

@@ -47,15 +47,31 @@ h6 {
 }
 
 .input-field {
-  @apply w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-400 focus:ring-4 focus:ring-brand-100;
+  @apply w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition;
+}
+
+.input-field::placeholder {
+  @apply text-slate-400;
+}
+
+.input-field:focus {
+  @apply border-brand-400 ring-4 ring-brand-100;
 }
 
 .primary-button {
-  @apply inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-brand-600 to-brand-500 px-5 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_14px_32px_rgba(37,99,235,0.22)];
+  @apply inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-brand-600 to-brand-500 px-5 py-3 text-sm font-semibold text-white transition;
+}
+
+.primary-button:hover {
+  @apply -translate-y-0.5 shadow-[0_14px_32px_rgba(37,99,235,0.22)];
 }
 
 .secondary-button {
-  @apply inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50;
+  @apply inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition;
+}
+
+.secondary-button:hover {
+  @apply border-slate-300 bg-slate-50;
 }
 
 .tatkal-shell {
@@ -71,15 +87,43 @@ h6 {
 }
 
 .field-base {
-  @apply w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-400 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-100;
+  @apply w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition;
+}
+
+.field-base::placeholder {
+  @apply text-slate-400;
+}
+
+.field-base:focus {
+  @apply border-brand-400 ring-4 ring-brand-100;
+}
+
+.field-base:disabled {
+  @apply bg-slate-100;
 }
 
 .button-primary {
-  @apply inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_14px_32px_rgba(37,99,235,0.22)] disabled:cursor-not-allowed disabled:opacity-60;
+  @apply inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 px-4 py-2.5 text-sm font-semibold text-white transition;
+}
+
+.button-primary:hover {
+  @apply -translate-y-0.5 shadow-[0_14px_32px_rgba(37,99,235,0.22)];
+}
+
+.button-primary:disabled {
+  @apply cursor-not-allowed opacity-60;
 }
 
 .button-secondary {
-  @apply inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60;
+  @apply inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition;
+}
+
+.button-secondary:hover {
+  @apply border-slate-300 bg-slate-50;
+}
+
+.button-secondary:disabled {
+  @apply cursor-not-allowed opacity-60;
 }
 
 .client-shell {
@@ -95,7 +139,11 @@ h6 {
 }
 
 .client-card-hover {
-  @apply transition hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-[0_20px_48px_rgba(15,23,42,0.08)];
+  @apply transition;
+}
+
+.client-card-hover:hover {
+  @apply -translate-y-0.5 border-brand-200 shadow-[0_20px_48px_rgba(15,23,42,0.08)];
 }
 
 .client-surface {
@@ -122,7 +170,11 @@ h6 {
 }
 
 .client-tab-idle {
-  @apply border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50;
+  @apply border-slate-200 bg-white text-slate-600;
+}
+
+.client-tab-idle:hover {
+  @apply border-slate-300 bg-slate-50;
 }
 
 .client-input-card {

@@ -130,17 +130,17 @@ const RequestDetailsPage = () => {
           <div className="mt-5 grid gap-4 sm:grid-cols-3">
             <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
               <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Client ID</p>
-              <p className="mt-3 text-sm font-medium text-white">{clientId}</p>
+              <p className="mt-3 text-sm font-medium text-slate-900">{clientId}</p>
             </div>
             <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
               <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Request Created</p>
-              <p className="mt-3 text-sm font-medium text-white">
+              <p className="mt-3 text-sm font-medium text-slate-900">
                 {details.design?.createdAt ? new Date(details.design.createdAt).toLocaleString() : 'Unavailable'}
               </p>
             </div>
             <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
               <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Deployed At</p>
-              <p className="mt-3 text-sm font-medium text-white">
+              <p className="mt-3 text-sm font-medium text-slate-900">
                 {details.deployment?.deployedAt
                   ? new Date(details.deployment.deployedAt).toLocaleString()
                   : 'Not deployed'}
@@ -150,7 +150,7 @@ const RequestDetailsPage = () => {
         </div>
 
         <div className="glass-card rounded-3xl p-5">
-          <h3 className="text-lg font-semibold text-slate-100">Deployment Controls</h3>
+          <h3 className="text-lg font-semibold text-slate-900">Deployment Controls</h3>
           <p className="mt-2 text-sm text-slate-400">
             Approve the request first, then generate the internal site URL and admin credentials for this client.
           </p>
@@ -177,7 +177,7 @@ const RequestDetailsPage = () => {
 
             {deploymentResult?.url ? (
               <div className="rounded-3xl border border-emerald-400/20 bg-emerald-500/10 p-4 text-sm text-emerald-100">
-                <p className="font-medium text-white">Generated deployment access</p>
+                <p className="font-medium text-slate-900">Generated deployment access</p>
                 <p className="mt-3">URL: {deploymentResult.url}</p>
                 <p className="mt-1">Username: {deploymentResult.username}</p>
                 <p className="mt-1">Password: {deploymentResult.password}</p>

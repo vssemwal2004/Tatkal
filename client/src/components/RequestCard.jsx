@@ -10,7 +10,7 @@ const RequestCard = ({ request, onOpen }) => (
   >
     <div className="min-w-0">
       <div className="flex flex-wrap items-center gap-2">
-        <h3 className="text-lg font-semibold text-slate-100">{request.clientName}</h3>
+        <h3 className="text-lg font-semibold text-slate-900 transition-colors group-hover:text-slate-100">{request.clientName}</h3>
         <StatusBadge value={request.status} />
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-2">
