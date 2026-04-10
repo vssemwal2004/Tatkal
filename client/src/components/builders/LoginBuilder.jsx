@@ -18,13 +18,13 @@ const LoginBuilder = ({ config, updateSection }) => (
       />
       <ToggleField
         checked={config.showUsername}
-        description="Show username input on the sign-in form."
+        description="Keep the email field visually emphasized on the sign-in form."
         label="Username field"
         onChange={(showUsername) => updateSection({ showUsername })}
       />
       <ToggleField
         checked={config.showPassword}
-        description="Show password input on the sign-in form."
+        description="Keep the password field visually emphasized on the sign-in form."
         label="Password field"
         onChange={(showPassword) => updateSection({ showPassword })}
       />
@@ -36,11 +36,17 @@ const LoginBuilder = ({ config, updateSection }) => (
       />
     </ControlSection>
 
-    <ControlSection subtitle="Control which sign-up fields are visible." title="Signup Form">
+    <ControlSection subtitle="Control which fields appear on the separate register page." title="Register Page">
       <ToggleField checked={config.signUpName} label="Name" onChange={(signUpName) => updateSection({ signUpName })} />
-      <ToggleField checked={config.signUpEmail} label="Email" onChange={(signUpEmail) => updateSection({ signUpEmail })} />
+      <ToggleField
+        checked={config.signUpEmail}
+        description="Email stays required for account creation and login."
+        label="Email"
+        onChange={(signUpEmail) => updateSection({ signUpEmail })}
+      />
       <ToggleField
         checked={config.signUpPassword}
+        description="Password stays required for account creation and login."
         label="Password"
         onChange={(signUpPassword) => updateSection({ signUpPassword })}
       />

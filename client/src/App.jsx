@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 
 import AdminLayout from './layouts/AdminLayout';
+import { useAuth } from './context/AuthContext';
 import ProtectedRoute from './routes/ProtectedRoute';
 import BuilderEntryPage from './pages/BuilderEntryPage';
 import BuilderPage from './pages/BuilderPage';
@@ -22,9 +23,18 @@ import RequestsPage from './pages/RequestsPage';
 import SettingsPage from './pages/SettingsPage';
 import TrackingPage from './pages/TrackingPage';
 
+const getRedirectPath = (role) => (role === 'admin' ? '/admin' : '/client/dashboard');
+
+const RootEntry = () => {
+  const { isAuthenticated, role } = useAuth();
+
+  return <Navigate to={isAuthenticated ? getRedirectPath(role) : '/login'} replace />;
+};
+
 const App = () => (
   <Routes>
-    <Route path="/" element={<LandingPage />} />
+    <Route path="/" element={<RootEntry />} />
+    <Route path="/welcome" element={<LandingPage />} />
     <Route path="/login" element={<LoginPage />} />
     <Route path="/register" element={<RegisterPage />} />
 

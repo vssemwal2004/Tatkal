@@ -30,25 +30,28 @@ const LoginPreview = ({ config, project }) => (
               <p className="text-2xl font-bold">{config.headline}</p>
               <p className="mt-2 text-sm text-slate-500">Secure access for your customers and operators.</p>
             </div>
-            {config.showUsername ? <FieldCard label="Username" /> : null}
-            {config.showPassword ? <FieldCard label="Password" type="password" /> : null}
+            <FieldCard label="Email" />
+            <FieldCard label="Password" type="password" />
             {config.showForgotPassword ? <p className="text-right text-xs font-medium text-slate-500">Forgot Password?</p> : null}
             <button className="w-full rounded-2xl px-4 py-3 text-sm font-semibold text-white" style={{ backgroundColor: config.buttonColor }} type="button">
               Sign in
             </button>
+            <p className="text-center text-sm text-slate-500">
+              Need an account? <span className="font-semibold">Register</span>
+            </p>
           </div>
         </div>
 
         <div className="rounded-[28px] border border-slate-200 bg-slate-50/90 p-7">
-          <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Signup Preview</p>
-          <p className="mt-4 text-2xl font-bold">Create customer account</p>
+          <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Register Page Preview</p>
+          <p className="mt-4 text-2xl font-bold">Create customer account on a separate page</p>
           <div className="mt-6 space-y-4">
             {config.signUpName ? <FieldCard label="Full name" /> : null}
-            {config.signUpEmail ? <FieldCard label="Email address" /> : null}
-            {config.signUpPassword ? <FieldCard label="Password" type="password" /> : null}
+            <FieldCard label="Email address" />
+            <FieldCard label="Password" type="password" />
           </div>
           <div className="mt-6 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">
-            Real preview updates instantly as each toggle and color setting changes.
+            This page opens only when the customer clicks the register option from login.
           </div>
         </div>
       </div>

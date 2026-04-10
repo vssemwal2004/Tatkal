@@ -55,6 +55,19 @@ const RequestDetailsPage = () => {
   const status = details?.design?.status;
   const isApproved = status === 'approved';
   const isDeployed = status === 'deployed';
+  const canDownloadPackage = isApproved || isDeployed;
+
+  const downloadProjectPackage = async () => {
+    const zipBlob = await exportClientZip(clientId);
+    const zipUrl = window.URL.createObjectURL(zipBlob);
+    const anchor = document.createElement('a');
+    anchor.href = zipUrl;
+    anchor.download = `${clientId}-project.zip`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    window.URL.revokeObjectURL(zipUrl);
+  };
 
   const onApprove = async () => {
     setProcessing(true);
@@ -62,24 +75,12 @@ const RequestDetailsPage = () => {
 
     try {
       await approveRequest(clientId);
-
-      const zipBlob = await exportClientZip(clientId);
-      const zipUrl = window.URL.createObjectURL(zipBlob);
-      const anchor = document.createElement('a');
-      anchor.href = zipUrl;
-      anchor.download = `${clientId}-frontend.zip`;
-      document.body.appendChild(anchor);
-      anchor.click();
-      anchor.remove();
-      window.URL.revokeObjectURL(zipUrl);
-
-      const deploymentResponse = await deploySystem({ clientId });
-      setDeploymentResult(deploymentResponse.deployment || null);
+      await downloadProjectPackage();
       await loadDetails();
 
       setFeedback({
         type: 'success',
-        message: deploymentResponse.message || 'Approved, ZIP downloaded, and deployment generated.'
+        message: 'Request approved and deploy-ready full-stack ZIP downloaded.'
       });
     } catch (err) {
       setFeedback({ type: 'error', message: err.response?.data?.message || 'Approval failed.' });
@@ -152,7 +153,8 @@ const RequestDetailsPage = () => {
         <div className="glass-card rounded-3xl p-5">
           <h3 className="text-lg font-semibold text-slate-900">Deployment Controls</h3>
           <p className="mt-2 text-sm text-slate-400">
-            Approve the request first, then generate the internal site URL and admin credentials for this client.
+            Approve the request to unlock the deploy-ready ZIP download, then optionally generate internal deployment
+            access for this client.
           </p>
 
           <div className="mt-5 space-y-4">
@@ -164,6 +166,32 @@ const RequestDetailsPage = () => {
                 className="secondary-button border-sky-400/40 bg-sky-500/10 text-sky-200 hover:bg-sky-500/20 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isApproved || isDeployed ? 'Approved' : 'Approve'}
+              </button>
+              <button
+                type="button"
+                disabled={processing || !canDownloadPackage}
+                onClick={async () => {
+                  setProcessing(true);
+                  setFeedback({ type: '', message: '' });
+
+                  try {
+                    await downloadProjectPackage();
+                    setFeedback({
+                      type: 'success',
+                      message: 'Full-stack project ZIP downloaded successfully.'
+                    });
+                  } catch (err) {
+                    setFeedback({
+                      type: 'error',
+                      message: err.response?.data?.message || 'Unable to download the project ZIP.'
+                    });
+                  } finally {
+                    setProcessing(false);
+                  }
+                }}
+                className="secondary-button border-emerald-400/40 bg-emerald-500/10 text-emerald-200 hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Download ZIP
               </button>
               <button
                 type="button"
