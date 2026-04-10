@@ -5,7 +5,7 @@ import JsonSection from '../components/JsonSection';
 import PageHeader from '../components/PageHeader';
 import StatusBadge from '../components/StatusBadge';
 import { deploySystem } from '../services/deployService';
-import { approveRequest, exportClientZip, fetchRequestDetails } from '../services/requestService';
+import { approveRequest, deleteRequest, exportClientZip, fetchRequestDetails } from '../services/requestService';
 
 const RequestDetailsPage = () => {
   const { clientId } = useParams();
@@ -62,7 +62,7 @@ const RequestDetailsPage = () => {
     const zipUrl = window.URL.createObjectURL(zipBlob);
     const anchor = document.createElement('a');
     anchor.href = zipUrl;
-    anchor.download = `${clientId}-project.zip`;
+    anchor.download = `${clientId}-frontend.zip`;
     document.body.appendChild(anchor);
     anchor.click();
     anchor.remove();
@@ -80,7 +80,7 @@ const RequestDetailsPage = () => {
 
       setFeedback({
         type: 'success',
-        message: 'Request approved and deploy-ready full-stack ZIP downloaded.'
+        message: 'Request approved and frontend template ZIP downloaded.'
       });
     } catch (err) {
       setFeedback({ type: 'error', message: err.response?.data?.message || 'Approval failed.' });
@@ -110,7 +110,22 @@ const RequestDetailsPage = () => {
   }
 
   if (!details) {
-    return <p className="text-red-300">No details found for this request.</p>;
+    return (
+      <section className="space-y-4">
+        {feedback.message ? (
+          <p
+            className={`rounded-2xl px-4 py-3 text-sm ${
+              feedback.type === 'error'
+                ? 'border border-red-400/20 bg-red-500/10 text-red-200'
+                : 'border border-emerald-400/20 bg-emerald-500/10 text-emerald-200'
+            }`}
+          >
+            {feedback.message}
+          </p>
+        ) : null}
+        <p className="text-red-300">No details found for this request.</p>
+      </section>
+    );
   }
 
   return (
@@ -153,7 +168,7 @@ const RequestDetailsPage = () => {
         <div className="glass-card rounded-3xl p-5">
           <h3 className="text-lg font-semibold text-slate-900">Deployment Controls</h3>
           <p className="mt-2 text-sm text-slate-400">
-            Approve the request to unlock the deploy-ready ZIP download, then optionally generate internal deployment
+            Approve the request to unlock the frontend template ZIP download, then optionally generate internal deployment
             access for this client.
           </p>
 
@@ -178,7 +193,7 @@ const RequestDetailsPage = () => {
                     await downloadProjectPackage();
                     setFeedback({
                       type: 'success',
-                      message: 'Full-stack project ZIP downloaded successfully.'
+                      message: 'Frontend template ZIP downloaded successfully.'
                     });
                   } catch (err) {
                     setFeedback({
@@ -215,6 +230,42 @@ const RequestDetailsPage = () => {
                 Deploying this request will create `/site/{clientId}` plus a generated username and password.
               </div>
             )}
+
+            <button
+              type="button"
+              disabled={processing}
+              onClick={async () => {
+                const confirmed = window.confirm(
+                  `Delete all saved requests for client ${clientId}? This cannot be undone.`
+                );
+
+                if (!confirmed) {
+                  return;
+                }
+
+                setProcessing(true);
+                setFeedback({ type: '', message: '' });
+
+                try {
+                  const response = await deleteRequest(clientId);
+                  setDetails(null);
+                  setFeedback({
+                    type: 'success',
+                    message: response.message || 'Request deleted successfully.'
+                  });
+                } catch (err) {
+                  setFeedback({
+                    type: 'error',
+                    message: err.response?.data?.message || 'Unable to delete the request.'
+                  });
+                } finally {
+                  setProcessing(false);
+                }
+              }}
+              className="secondary-button border-red-400/40 bg-red-500/10 text-red-200 hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Delete Request
+            </button>
           </div>
         </div>
       </div>

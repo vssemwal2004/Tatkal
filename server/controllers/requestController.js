@@ -11,6 +11,7 @@ const buildRequestPayload = (design, clientMap) => ({
   clientId: design.clientId,
   clientName: clientMap[design.clientId]?.name || 'Unknown Client',
   businessType: clientMap[design.clientId]?.businessType || 'travel',
+  clientActive: clientMap[design.clientId]?.isActive !== false,
   status: design.status,
   createdAt: design.createdAt,
   updatedAt: design.updatedAt,
@@ -64,6 +65,16 @@ const getRequestByClientId = async (req, res, next) => {
 const approveRequest = async (req, res, next) => {
   try {
     const { clientId } = req.params;
+    const client = await Client.findOne({ clientId }).lean();
+
+    if (!client) {
+      return res.status(404).json({ message: 'Client not found. It may have been removed.' });
+    }
+
+    if (!client.isActive) {
+      return res.status(403).json({ message: 'This client ID is disabled. Activate it before approval.' });
+    }
+
     const existing = await Design.findOne({ clientId }).sort({ createdAt: -1 });
 
     if (!existing) {
@@ -121,9 +132,28 @@ const getDashboardStats = async (req, res, next) => {
   }
 };
 
+const deleteRequest = async (req, res, next) => {
+  try {
+    const { clientId } = req.params;
+    const result = await Design.deleteMany({ clientId });
+
+    if (!result.deletedCount) {
+      return res.status(404).json({ message: 'No request found to delete for this client' });
+    }
+
+    return res.status(200).json({
+      message: 'Request deleted successfully',
+      deletedCount: result.deletedCount
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 module.exports = {
   getAllRequests,
   getRequestByClientId,
   approveRequest,
+  deleteRequest,
   getDashboardStats
 };

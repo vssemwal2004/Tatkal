@@ -1,0 +1,9 @@
+{
+  "name": "tatkal-generated-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Frontend-only generated project wired to central TATKAL backend APIs",
+  "scripts": {
+    "start": "npx serve . -l 4173"
+  }
+}

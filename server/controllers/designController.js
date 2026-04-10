@@ -1,5 +1,6 @@
 const Client = require('../models/Client');
 const Design = require('../models/Design');
+const { ensureClientAccess } = require('../utils/clientAccess');
 
 const buildSummary = (config = {}) => ({
   projectName: config.project?.projectName || 'Untitled Platform',
@@ -43,10 +44,10 @@ const saveDesign = async (req, res, next) => {
       return res.status(403).json({ message: 'You do not have access to this design' });
     }
 
-    const client = await Client.findOne({ clientId });
+    const client = await ensureClientAccess(req, res, clientId);
 
     if (!client) {
-      return res.status(404).json({ message: 'Client profile not found' });
+      return null;
     }
 
     let design = await Design.findOne({ clientId }).sort({ createdAt: -1 });
@@ -92,6 +93,11 @@ const getDesignByClientId = async (req, res, next) => {
 
     if (!canAccessClient(req, clientId)) {
       return res.status(403).json({ message: 'You do not have access to this design' });
+    }
+
+    const client = await ensureClientAccess(req, res, clientId);
+    if (!client) {
+      return null;
     }
 
     const design = await Design.findOne({ clientId }).sort({ createdAt: -1 }).lean();

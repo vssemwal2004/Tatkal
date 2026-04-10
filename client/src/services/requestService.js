@@ -20,6 +20,11 @@ export const approveRequest = async (clientId) => {
   return data;
 };
 
+export const deleteRequest = async (clientId) => {
+  const { data } = await api.delete(`/admin/request/${clientId}`);
+  return data;
+};
+
 export const exportClientZip = async (clientId) => {
   const response = await api.post(`/admin/export/${clientId}`, {}, {
     responseType: 'blob'

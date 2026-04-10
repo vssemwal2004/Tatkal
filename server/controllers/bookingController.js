@@ -1,6 +1,7 @@
 const Booking = require('../models/Booking');
 const SeatLock = require('../models/SeatLock');
 const Payment = require('../models/Payment');
+const { ensureClientAccess } = require('../utils/clientAccess');
 
 const lockSeat = async (req, res, next) => {
   try {
@@ -8,6 +9,11 @@ const lockSeat = async (req, res, next) => {
 
     if (!clientId || !routeId || !seatId) {
       return res.status(400).json({ message: 'clientId, routeId, and seatId are required' });
+    }
+
+    const accessibleClient = await ensureClientAccess(req, res, clientId);
+    if (!accessibleClient) {
+      return null;
     }
 
     const now = new Date();
@@ -81,6 +87,11 @@ const confirmBooking = async (req, res, next) => {
       return res.status(404).json({ message: 'Seat lock not found' });
     }
 
+    const accessibleClient = await ensureClientAccess(req, res, lock.clientId);
+    if (!accessibleClient) {
+      return null;
+    }
+
     if (lock.expiresAt <= new Date()) {
       lock.status = 'expired';
       await lock.save();
@@ -136,10 +147,15 @@ const confirmBooking = async (req, res, next) => {
 
 const getHistory = async (req, res, next) => {
   try {
-    const clientId = req.query.clientId;
+    const clientId = req.query.clientId || req.user.clientId;
     const filter = { userId: req.user.id };
 
     if (clientId) {
+      const accessibleClient = await ensureClientAccess(req, res, clientId);
+      if (!accessibleClient) {
+        return null;
+      }
+
       filter.clientId = clientId;
     }
 

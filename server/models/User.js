@@ -20,6 +20,12 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ['admin', 'client'],
       default: 'admin'
+    },
+    clientId: {
+      type: String,
+      trim: true,
+      default: null,
+      index: true
     }
   },
   { timestamps: true }

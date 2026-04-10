@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const TEMPLATE_ROOT = path.resolve(__dirname, '..', 'templates', 'generated-project');
+const TEMPLATE_ROOT = path.resolve(__dirname, '..', 'templates', 'generated-frontend');
 
 const fallbackRoutes = [
   {
@@ -41,6 +41,7 @@ const buildProjectData = ({ client, design }) => {
 
   return {
     generatedAt: new Date().toISOString(),
+    backendBaseUrl: process.env.PUBLIC_BACKEND_API_URL || 'http://localhost:5000/api',
     project: {
       clientId: client.clientId,
       projectName: project.projectName || client.name || 'Tatkal Generated Project',
@@ -98,12 +99,7 @@ const buildProjectData = ({ client, design }) => {
         headerColor: history.headerColor || '#2563eb'
       }
     },
-    routes: routes.map(normalizeRoute),
-    users: [],
-    sessions: [],
-    seatLocks: [],
-    payments: [],
-    bookings: []
+    routes: routes.map(normalizeRoute)
   };
 };
 
@@ -129,10 +125,11 @@ const readTemplateFiles = (currentDir, relativeDir = '') => {
 
 const createGeneratedProjectFiles = ({ client, design }) => {
   const files = readTemplateFiles(TEMPLATE_ROOT);
+  const generatedConfig = buildProjectData({ client, design });
 
   files.push({
-    name: 'data/app-data.json',
-    content: JSON.stringify(buildProjectData({ client, design }), null, 2)
+    name: 'src/generated-config.js',
+    content: `window.__TATKAL_GENERATED_CONFIG__ = ${JSON.stringify(generatedConfig, null, 2)};\n`
   });
 
   return files;

@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const Razorpay = require('razorpay');
 const Payment = require('../models/Payment');
+const { ensureClientAccess } = require('../utils/clientAccess');
 
 const getRazorpayClient = () => {
   const keyId = process.env.RAZORPAY_KEY_ID;
@@ -19,6 +20,11 @@ const createOrder = async (req, res, next) => {
 
     if (!amount || !clientId) {
       return res.status(400).json({ message: 'amount and clientId are required' });
+    }
+
+    const accessibleClient = await ensureClientAccess(req, res, clientId);
+    if (!accessibleClient) {
+      return null;
     }
 
     const razorpay = getRazorpayClient();
@@ -73,6 +79,15 @@ const verifyPayment = async (req, res, next) => {
     const existing = await Payment.findOne({ orderId }).lean();
     if (!existing) {
       return res.status(404).json({ message: 'Payment order not found' });
+    }
+
+    const accessibleClient = await ensureClientAccess(req, res, existing.clientId);
+    if (!accessibleClient) {
+      return null;
+    }
+
+    if (req.user?.role !== 'admin' && existing.userId.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'You do not have access to this payment order' });
     }
 
     if (existing.status === 'verified') {

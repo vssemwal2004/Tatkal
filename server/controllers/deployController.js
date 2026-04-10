@@ -17,6 +17,10 @@ const deploySystem = async (req, res, next) => {
       return res.status(404).json({ message: 'Client not found' });
     }
 
+    if (!client.isActive) {
+      return res.status(403).json({ message: 'This client ID is disabled. Activate it before deployment.' });
+    }
+
     const latestDesign = await Design.findOne({ clientId }).sort({ createdAt: -1 });
 
     if (!latestDesign) {

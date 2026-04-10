@@ -1,5 +1,6 @@
 const Design = require('../models/Design');
 const { buildSummary } = require('./designController');
+const { ensureClientAccess } = require('../utils/clientAccess');
 
 const getClientStatus = async (req, res, next) => {
   try {
@@ -7,6 +8,11 @@ const getClientStatus = async (req, res, next) => {
 
     if (req.user?.role !== 'admin' && req.user?.clientId !== clientId) {
       return res.status(403).json({ message: 'You do not have access to this project status' });
+    }
+
+    const client = await ensureClientAccess(req, res, clientId);
+    if (!client) {
+      return null;
     }
 
     const design = await Design.findOne({ clientId }).sort({ createdAt: -1 }).lean();

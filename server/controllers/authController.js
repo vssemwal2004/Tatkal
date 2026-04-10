@@ -12,12 +12,44 @@ const formatClientName = (email) =>
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(' ') || 'Client';
 
+const createClientAccessError = (message, statusCode) => {
+  const error = new Error(message);
+  error.statusCode = statusCode;
+  return error;
+};
+
 const ensureClientProfile = async (user) => {
+  if (user.clientId) {
+    const linkedClient = await Client.findOne({ clientId: user.clientId });
+
+    if (!linkedClient) {
+      throw createClientAccessError('Client ID not found. It may have been removed by admin.', 403);
+    }
+
+    if (!linkedClient.isActive) {
+      throw createClientAccessError('This client ID is disabled by admin.', 403);
+    }
+
+    if (!linkedClient.userId) {
+      linkedClient.userId = user._id;
+    }
+    if (!linkedClient.email) {
+      linkedClient.email = user.email;
+    }
+    await linkedClient.save();
+
+    return linkedClient;
+  }
+
   let client = await Client.findOne({
     $or: [{ userId: user._id }, { email: user.email }]
   });
 
   if (client) {
+    if (!client.isActive) {
+      throw createClientAccessError('This client ID is disabled by admin.', 403);
+    }
+
     if (!client.userId) {
       client.userId = user._id;
     }
@@ -25,6 +57,12 @@ const ensureClientProfile = async (user) => {
       client.email = user.email;
     }
     await client.save();
+
+    if (user.clientId !== client.clientId) {
+      user.clientId = client.clientId;
+      await user.save();
+    }
+
     return client;
   }
 
@@ -35,6 +73,9 @@ const ensureClientProfile = async (user) => {
     name: formatClientName(user.email),
     businessType: 'travel'
   });
+
+  user.clientId = client.clientId;
+  await user.save();
 
   return client;
 };
@@ -81,6 +122,10 @@ const register = async (req, res, next) => {
       }
     });
   } catch (error) {
+    if (error.statusCode) {
+      return res.status(error.statusCode).json({ message: error.message });
+    }
+
     return next(error);
   }
 };
@@ -158,6 +203,10 @@ const login = async (req, res, next) => {
       user: buildClientSession(user, client)
     });
   } catch (error) {
+    if (error.statusCode) {
+      return res.status(error.statusCode).json({ message: error.message });
+    }
+
     return next(error);
   }
 };

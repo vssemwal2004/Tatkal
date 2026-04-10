@@ -39,7 +39,7 @@ const RequestsPage = () => {
       <PageHeader
         eyebrow="Review Queue"
         title="Incoming Client Requests"
-        description="Open each submission to inspect the builder JSON, approve the request, and deploy a generated client site."
+        description="Open each submission to inspect the builder JSON, approve the request, and download the frontend template package."
         action={
           <input
             type="text"

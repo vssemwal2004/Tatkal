@@ -13,6 +13,14 @@ const exportClientZip = async (req, res, next) => {
       return res.status(404).json({ message: 'Client or design not found for export' });
     }
 
+    if (!client.isActive) {
+      return res.status(403).json({ message: 'This client ID is disabled. Activate it before export.' });
+    }
+
+    if (!['approved', 'deployed'].includes(design.status)) {
+      return res.status(400).json({ message: 'Only approved requests can be exported.' });
+    }
+
     const files = createGeneratedProjectFiles({ client, design });
     const archive = archiver('zip', { zlib: { level: 9 } });
 
@@ -20,7 +28,7 @@ const exportClientZip = async (req, res, next) => {
       throw archiveError;
     });
 
-    res.attachment(`${clientId}-project.zip`);
+    res.attachment(`${clientId}-frontend.zip`);
     archive.pipe(res);
 
     files.forEach((file) => {

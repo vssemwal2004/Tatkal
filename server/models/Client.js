@@ -32,6 +32,11 @@ const clientSchema = new mongoose.Schema(
       enum: ['travel', 'event'],
       required: true,
       default: 'travel'
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+      index: true
     }
   },
   {
