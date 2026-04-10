@@ -2,7 +2,7 @@ import { ColorField, ControlSection, SelectField, ToggleField, TextField } from 
 
 const PaymentBuilder = ({ config, updateSection }) => (
   <div className="space-y-5">
-    <ControlSection subtitle="Shape the payment section’s theme and action style." title="Theme">
+    <ControlSection subtitle="Shape the payment section's theme and action style." title="Theme">
       <SelectField
         label="Button style"
         onChange={(buttonStyle) => updateSection({ buttonStyle })}

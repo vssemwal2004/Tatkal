@@ -46,7 +46,7 @@ const LoginBuilder = ({ config, updateSection }) => (
       />
     </ControlSection>
 
-    <ControlSection subtitle="Use theme values for a premium dark layout." title="Colors">
+    <ControlSection subtitle="Use theme values for a lighter, cleaner first screen." title="Colors">
       <ColorField
         label="Background color"
         onChange={(backgroundColor) => updateSection({ backgroundColor })}

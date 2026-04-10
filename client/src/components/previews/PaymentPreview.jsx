@@ -17,37 +17,37 @@ const PaymentPreview = ({ config }) => {
   return (
     <PreviewFrame title="Payment Page Preview">
       <div className="mx-auto grid max-w-5xl gap-5 lg:grid-cols-[1fr_0.9fr]">
-        <div className="rounded-[30px] border border-white/10 p-6" style={{ backgroundColor: config.surfaceColor, color: config.textColor }}>
-          <p className="text-xs uppercase tracking-[0.24em] opacity-60">Secure checkout</p>
+        <div className="rounded-[30px] border border-slate-200 p-6 shadow-[0_16px_36px_rgba(15,23,42,0.06)]" style={{ backgroundColor: config.surfaceColor, color: config.textColor }}>
+          <p className="text-xs uppercase tracking-[0.24em] text-slate-500">Secure checkout</p>
           <h3 className="mt-2 text-3xl font-bold">Confirm your booking</h3>
           <div className="mt-6 space-y-4">
             {paymentOptions.map((option, index) => (
               <div
-                className="flex items-center justify-between rounded-2xl border border-white/10 px-4 py-4"
+                className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-4"
                 key={option.id}
                 style={{
-                  backgroundColor: index === 0 ? `${config.accentColor}20` : 'rgba(255,255,255,0.03)'
+                  backgroundColor: index === 0 ? `${config.accentColor}18` : '#f8fafc'
                 }}
               >
                 <span>{option.label}</span>
-                <span className="text-xs uppercase tracking-[0.22em] opacity-70">{index === 0 ? 'Preferred' : 'Available'}</span>
+                <span className="text-xs uppercase tracking-[0.22em] text-slate-500">{index === 0 ? 'Preferred' : 'Available'}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="rounded-[30px] border border-white/10 bg-slate-950/70 p-6 text-white">
-          <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Fare summary</p>
+        <div className="rounded-[30px] border border-slate-200 bg-white p-6 text-slate-950 shadow-[0_16px_36px_rgba(15,23,42,0.06)]">
+          <p className="text-xs uppercase tracking-[0.24em] text-slate-500">Fare summary</p>
           <div className="mt-6 space-y-4">
             <SummaryRow label="Base fare" value="Rs 1,240" />
             <SummaryRow label="Taxes" value="Rs 110" />
             <SummaryRow label="Service fee" value="Rs 40" />
           </div>
-          <div className="mt-6 border-t border-white/10 pt-5">
+          <div className="mt-6 border-t border-slate-200 pt-5">
             <SummaryRow label="Total" value="Rs 1,390" />
           </div>
           <button
-            className="mt-8 w-full px-4 py-4 text-sm font-semibold text-slate-950"
+            className="mt-8 w-full px-4 py-4 text-sm font-semibold text-white"
             style={{
               backgroundColor: config.accentColor,
               borderRadius: buttonRadius[config.buttonStyle] || buttonRadius.rounded
@@ -64,8 +64,8 @@ const PaymentPreview = ({ config }) => {
 
 const SummaryRow = ({ label, value }) => (
   <div className="flex items-center justify-between text-sm">
-    <span className="text-slate-300">{label}</span>
-    <span className="font-semibold text-white">{value}</span>
+    <span className="text-slate-500">{label}</span>
+    <span className="font-semibold text-slate-950">{value}</span>
   </div>
 );
 

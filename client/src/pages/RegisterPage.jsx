@@ -28,7 +28,7 @@ const RegisterPage = () => {
         email: form.email,
         password: form.password
       });
-      navigate('/client/builder-entry', { replace: true });
+      navigate('/client/dashboard', { replace: true });
     } catch (requestError) {
       setError(requestError.response?.data?.message || 'Unable to create your account right now.');
     }
@@ -42,22 +42,25 @@ const RegisterPage = () => {
         <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
           <section>
             <p className="client-section-title">Client Registration</p>
-            <h1 className="mt-2 text-4xl font-semibold text-white">Create your account and enter the platform studio.</h1>
-            <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-400">
-              Register once, get your client identity on login, and start configuring the booking system without touching code.
+            <h1 className="mt-2 text-4xl font-semibold tracking-[-0.04em] text-slate-950">
+              Create your account and enter the platform studio.
+            </h1>
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600">
+              Register once, get your client identity on login, and start configuring the booking system without
+              touching code.
             </p>
 
             <div className="mt-8 grid gap-3 sm:grid-cols-3">
               <MiniFeature title="Quick Setup" text="Email and password only" />
               <MiniFeature title="Shared Login" text="Admin and client in one app" />
-              <MiniFeature title="Direct Builder" text="Go straight to design flow" />
+              <MiniFeature title="Direct Dashboard" text="Go straight to the design workspace" />
             </div>
           </section>
 
-          <section className="tatkal-shell rounded-[28px] p-5 sm:p-6">
+          <section className="client-card p-5 sm:p-6">
             <form className="space-y-4" onSubmit={handleSubmit}>
               <label className="block space-y-1.5">
-                <span className="text-xs font-medium uppercase tracking-[0.18em] text-slate-400">Email</span>
+                <span className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Email</span>
                 <input
                   className="field-base"
                   onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
@@ -69,7 +72,7 @@ const RegisterPage = () => {
               </label>
 
               <label className="block space-y-1.5">
-                <span className="text-xs font-medium uppercase tracking-[0.18em] text-slate-400">Password</span>
+                <span className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Password</span>
                 <input
                   className="field-base"
                   onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
@@ -81,7 +84,7 @@ const RegisterPage = () => {
               </label>
 
               <label className="block space-y-1.5">
-                <span className="text-xs font-medium uppercase tracking-[0.18em] text-slate-400">Confirm Password</span>
+                <span className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Confirm Password</span>
                 <input
                   className="field-base"
                   onChange={(event) => setForm((current) => ({ ...current, confirmPassword: event.target.value }))}
@@ -92,16 +95,16 @@ const RegisterPage = () => {
                 />
               </label>
 
-              {error ? <p className="rounded-xl border border-rose-400/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-200">{error}</p> : null}
+              {error ? <p className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p> : null}
 
               <button className="button-primary w-full" disabled={loading} type="submit">
                 {loading ? 'Creating account...' : 'Register'}
               </button>
             </form>
 
-            <p className="mt-5 text-sm text-slate-400">
+            <p className="mt-5 text-sm text-slate-600">
               Already have an account?{' '}
-              <Link className="font-semibold text-aurora-300" to="/login">
+              <Link className="font-semibold text-brand-700" to="/login">
                 Login
               </Link>
             </p>
@@ -114,8 +117,8 @@ const RegisterPage = () => {
 
 const MiniFeature = ({ title, text }) => (
   <div className="client-card p-4">
-    <p className="text-sm font-semibold text-white">{title}</p>
-    <p className="mt-1 text-sm text-slate-400">{text}</p>
+    <p className="text-sm font-semibold text-slate-950">{title}</p>
+    <p className="mt-1 text-sm text-slate-600">{text}</p>
   </div>
 );
 

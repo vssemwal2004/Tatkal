@@ -5,6 +5,12 @@ import ProtectedRoute from './routes/ProtectedRoute';
 import BuilderEntryPage from './pages/BuilderEntryPage';
 import BuilderPage from './pages/BuilderPage';
 import BusinessTypePage from './pages/BusinessTypePage';
+import ClientDashboardDesignPage from './pages/ClientDashboardDesignPage';
+import ClientHistoryDesignPage from './pages/ClientHistoryDesignPage';
+import ClientLoginDesignPage from './pages/ClientLoginDesignPage';
+import ClientPaymentDesignPage from './pages/ClientPaymentDesignPage';
+import ClientSeatDesignPage from './pages/ClientSeatDesignPage';
+import ClientWorkspacePage from './pages/ClientWorkspacePage';
 import ClientsPage from './pages/ClientsPage';
 import DashboardPage from './pages/DashboardPage';
 import DeploymentsPage from './pages/DeploymentsPage';
@@ -34,9 +40,16 @@ const App = () => (
     </Route>
 
     <Route element={<ProtectedRoute requiredRole="client" />}>
+      <Route path="/client" element={<Navigate to="/client/dashboard" replace />} />
+      <Route path="/client/dashboard" element={<ClientWorkspacePage />} />
       <Route path="/client/builder-entry" element={<BuilderEntryPage />} />
       <Route path="/client/business-type" element={<BusinessTypePage />} />
       <Route path="/client/builder" element={<BuilderPage />} />
+      <Route path="/client/builder/login" element={<ClientLoginDesignPage />} />
+      <Route path="/client/builder/dashboard" element={<ClientDashboardDesignPage />} />
+      <Route path="/client/builder/seats" element={<ClientSeatDesignPage />} />
+      <Route path="/client/builder/payment" element={<ClientPaymentDesignPage />} />
+      <Route path="/client/builder/history" element={<ClientHistoryDesignPage />} />
       <Route path="/client/track" element={<TrackingPage />} />
     </Route>
 

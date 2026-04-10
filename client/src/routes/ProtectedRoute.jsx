@@ -2,7 +2,7 @@ import { Navigate, Outlet } from 'react-router-dom';
 
 import { useAuth } from '../context/AuthContext';
 
-const getDefaultRouteForRole = (role) => (role === 'admin' ? '/admin' : '/client/builder-entry');
+const getDefaultRouteForRole = (role) => (role === 'admin' ? '/admin' : '/client/dashboard');
 
 const ProtectedRoute = ({ requiredRole }) => {
   const { isAuthenticated, role } = useAuth();

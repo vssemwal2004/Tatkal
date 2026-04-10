@@ -25,20 +25,20 @@ const TravelPreview = ({ config }) => {
   const seatRows = buildSeatRows(config.layout);
 
   return (
-    <div className="mx-auto max-w-3xl rounded-[30px] border border-white/10 bg-slate-950/70 p-6">
+    <div className="mx-auto max-w-3xl rounded-[30px] border border-slate-200 bg-white p-6 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
       <div className="mb-5 flex items-center justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Bus layout</p>
-          <h3 className="mt-2 text-2xl font-bold text-white">Choose your seat</h3>
+          <p className="text-xs uppercase tracking-[0.24em] text-slate-500">Bus layout</p>
+          <h3 className="mt-2 text-2xl font-bold text-slate-950">Choose your seat</h3>
         </div>
-        <div className="rounded-full border border-white/10 px-4 py-2 text-xs text-slate-300">Layout {config.layout}</div>
+        <div className="rounded-full border border-slate-200 px-4 py-2 text-xs text-slate-600">Layout {config.layout}</div>
       </div>
-      <div className="mb-6 flex flex-wrap gap-3 text-xs text-slate-300">
+      <div className="mb-6 flex flex-wrap gap-3 text-xs text-slate-600">
         <Legend color={config.availableColor} label="Available" />
         <Legend color={config.selectedColor} label="Selected" />
         <Legend color={config.bookedColor} label="Booked" />
       </div>
-      <div className="space-y-3 rounded-[26px] border border-white/8 bg-white/5 p-5">
+      <div className="space-y-3 rounded-[26px] border border-slate-200 bg-slate-50 p-5">
         {seatRows.map((row, rowIndex) => (
           <div className="grid gap-3" key={`row-${rowIndex}`} style={{ gridTemplateColumns: `repeat(${row.length}, minmax(0, 1fr))` }}>
             {row.map((seat, seatIndex) =>
@@ -72,24 +72,24 @@ const EventPreview = ({ config }) => (
       { name: 'Gold Zone', color: config.availableColor, note: 'High demand visibility' },
       { name: 'Standard Bay', color: config.bookedColor, note: 'Mostly reserved already' }
     ].map((zone) => (
-      <div className="rounded-[28px] border border-white/10 bg-slate-950/70 p-6" key={zone.name}>
+      <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_16px_36px_rgba(15,23,42,0.06)]" key={zone.name}>
         <div className="mb-5 h-36 rounded-[24px]" style={{ backgroundColor: zone.color }} />
-        <p className="text-xs uppercase tracking-[0.24em] text-slate-400">{zone.note}</p>
-        <h3 className="mt-2 text-2xl font-bold text-white">{zone.name}</h3>
-        <p className="mt-3 text-sm text-slate-300">Uses the same config-driven seat state palette as the travel builder.</p>
+        <p className="text-xs uppercase tracking-[0.24em] text-slate-500">{zone.note}</p>
+        <h3 className="mt-2 text-2xl font-bold text-slate-950">{zone.name}</h3>
+        <p className="mt-3 text-sm text-slate-600">Uses the same config-driven seat state palette as the travel builder.</p>
       </div>
     ))}
   </div>
 );
 
 const Seat = ({ color, label }) => (
-  <div className="flex h-16 items-center justify-center rounded-2xl text-sm font-semibold text-slate-950" style={{ backgroundColor: color }}>
+  <div className="flex h-16 items-center justify-center rounded-2xl border border-white/70 text-sm font-semibold text-slate-950" style={{ backgroundColor: color }}>
     {label}
   </div>
 );
 
 const Legend = ({ color, label }) => (
-  <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2">
+  <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-2">
     <span className="h-3 w-3 rounded-full" style={{ backgroundColor: color }} />
     <span>{label}</span>
   </div>

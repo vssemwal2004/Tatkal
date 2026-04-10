@@ -51,15 +51,16 @@ const TrackingPage = () => {
 
       <main className="client-shell">
         <div className="grid gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
-          <section className="tatkal-shell rounded-[28px] p-5">
+          <section className="client-card p-5">
             <p className="client-section-title">Track My Project</p>
-            <h1 className="mt-2 text-2xl font-semibold text-white">Monitor review and deployment progress.</h1>
-            <p className="mt-3 text-sm leading-7 text-slate-400">
-              Use your client ID to check the latest project status, generated link, and credentials once deployment is complete.
+            <h1 className="mt-2 text-2xl font-semibold text-slate-950">Monitor review and deployment progress.</h1>
+            <p className="mt-3 text-sm leading-7 text-slate-600">
+              Use your client ID to check the latest project status, generated package link, and credentials once
+              deployment is complete.
             </p>
 
             <label className="mt-6 block space-y-1.5">
-              <span className="text-xs font-medium uppercase tracking-[0.18em] text-slate-400">Client ID</span>
+              <span className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Client ID</span>
               <input
                 className="field-base"
                 onChange={(event) => setLookupId(event.target.value)}
@@ -72,7 +73,7 @@ const TrackingPage = () => {
               {loading ? 'Loading...' : 'Check Status'}
             </button>
 
-            {error ? <p className="mt-4 rounded-xl border border-rose-400/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-200">{error}</p> : null}
+            {error ? <p className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p> : null}
           </section>
 
           <section className="space-y-4">
@@ -82,10 +83,10 @@ const TrackingPage = () => {
                   <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
                     <div>
                       <p className="client-section-title">Current Status</p>
-                      <h2 className="mt-2 text-3xl font-semibold text-white">
+                      <h2 className="mt-2 text-3xl font-semibold text-slate-950">
                         {projectData.summary?.projectName || 'Untitled Platform'}
                       </h2>
-                      <p className="mt-2 text-sm leading-7 text-slate-400">
+                      <p className="mt-2 text-sm leading-7 text-slate-600">
                         {projectData.summary?.businessType || 'travel'} platform in the TATKAL deployment workflow.
                       </p>
                     </div>
@@ -100,7 +101,7 @@ const TrackingPage = () => {
                 </div>
 
                 <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
-                  <div className="tatkal-shell rounded-[24px] p-5">
+                  <div className="client-card p-5">
                     <p className="client-section-title">Project Summary</p>
                     <div className="mt-4 space-y-3">
                       <SummaryRow label="Login fields" value={formatFields(projectData.summary?.loginFields || {})} />
@@ -109,7 +110,7 @@ const TrackingPage = () => {
                     </div>
                   </div>
 
-                  <div className="tatkal-shell rounded-[24px] p-5">
+                  <div className="client-card p-5">
                     <p className="client-section-title">Deployment Access</p>
                     <div className="mt-4 space-y-3">
                       <AccessCard icon={Link2} label="Deployment URL" value={projectData.url || 'Pending deployment'} />
@@ -120,10 +121,10 @@ const TrackingPage = () => {
                 </div>
               </>
             ) : (
-              <div className="tatkal-shell rounded-[28px] p-10 text-center">
+              <div className="client-card p-10 text-center">
                 <p className="client-section-title">No Project Loaded</p>
-                <h2 className="mt-3 text-2xl font-semibold text-white">Status details will appear here.</h2>
-                <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-slate-400">
+                <h2 className="mt-3 text-2xl font-semibold text-slate-950">Status details will appear here.</h2>
+                <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-slate-600">
                   Submit a design from the builder or enter an existing client ID to see the latest deployment progress.
                 </p>
               </div>
@@ -136,26 +137,26 @@ const TrackingPage = () => {
 };
 
 const InfoCard = ({ label, value }) => (
-  <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
     <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">{label}</p>
-    <p className="mt-2 text-sm font-semibold text-white">{value}</p>
+    <p className="mt-2 text-sm font-semibold text-slate-950 capitalize">{value}</p>
   </div>
 );
 
 const SummaryRow = ({ label, value }) => (
-  <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
-    <span className="text-sm text-slate-400">{label}</span>
-    <span className="text-sm font-medium text-white">{value}</span>
+  <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+    <span className="text-sm text-slate-500">{label}</span>
+    <span className="text-sm font-medium text-slate-950">{value}</span>
   </div>
 );
 
 const AccessCard = ({ icon: Icon, label, value }) => (
-  <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-    <div className="flex items-center gap-2 text-slate-400">
-      <Icon className="h-4 w-4 text-aurora-300" />
+  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+    <div className="flex items-center gap-2 text-slate-500">
+      <Icon className="h-4 w-4 text-brand-600" />
       <span className="text-[11px] uppercase tracking-[0.2em]">{label}</span>
     </div>
-    <p className="mt-2 break-all font-mono text-sm text-white">{value}</p>
+    <p className="mt-2 break-all font-mono text-sm text-slate-950">{value}</p>
   </div>
 );
 

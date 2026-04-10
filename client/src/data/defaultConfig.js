@@ -1,5 +1,41 @@
 const createProjectId = () => `client_${Date.now()}`;
 
+const defaultRoutes = [
+  {
+    id: 'route-1',
+    from: 'Ahmedabad',
+    to: 'Mumbai',
+    operator: 'Royal Express',
+    departure: '07:15',
+    arrival: '17:45',
+    duration: '10h 30m',
+    price: 1240,
+    seatsLeft: 8
+  },
+  {
+    id: 'route-2',
+    from: 'Ahmedabad',
+    to: 'Mumbai',
+    operator: 'Metro Sleeper',
+    departure: '09:30',
+    arrival: '20:05',
+    duration: '10h 35m',
+    price: 1480,
+    seatsLeft: 4
+  },
+  {
+    id: 'route-3',
+    from: 'Surat',
+    to: 'Pune',
+    operator: 'Western Connect',
+    departure: '21:00',
+    arrival: '06:50',
+    duration: '9h 50m',
+    price: 1180,
+    seatsLeft: 11
+  }
+];
+
 export const createDefaultBuilderState = () => ({
   project: {
     clientId: createProjectId(),
@@ -12,39 +48,39 @@ export const createDefaultBuilderState = () => ({
   loginPage: {
     logo: '',
     headline: 'Welcome back',
-    subheading: 'Launch premium booking experiences in minutes.',
+    subheading: 'Book routes faster with a cleaner and more reliable travel experience.',
     showUsername: true,
     showPassword: true,
     showForgotPassword: true,
     signUpName: true,
     signUpEmail: true,
     signUpPassword: true,
-    backgroundColor: '#07111f',
-    buttonColor: '#3dd9c5',
-    textColor: '#eef2ff'
+    backgroundColor: '#f8fafc',
+    buttonColor: '#2563eb',
+    textColor: '#0f172a'
   },
   dashboard: {
     backgroundImage: '',
-    width: 88,
-    height: 74,
-    cardSize: 72,
+    width: 92,
+    height: 76,
+    cardSize: 78,
     fromLabel: 'From',
     toLabel: 'To',
-    buttonLabel: 'Search journeys',
-    buttonColor: '#3dd9c5',
-    textColor: '#f8fafc',
-    panelColor: 'rgba(7, 17, 31, 0.84)'
+    buttonLabel: 'Search routes',
+    buttonColor: '#2563eb',
+    textColor: '#0f172a',
+    panelColor: 'rgba(255, 255, 255, 0.92)'
   },
   seatSelection: {
     layout: '2x2',
-    availableColor: '#7dd3fc',
-    selectedColor: '#3dd9c5',
-    bookedColor: '#f97360'
+    availableColor: '#bfdbfe',
+    selectedColor: '#2563eb',
+    bookedColor: '#fb7185'
   },
   payment: {
-    accentColor: '#3dd9c5',
-    surfaceColor: '#0c1728',
-    textColor: '#f8fafc',
+    accentColor: '#2563eb',
+    surfaceColor: '#ffffff',
+    textColor: '#0f172a',
     buttonStyle: 'rounded',
     options: {
       upi: true,
@@ -55,10 +91,11 @@ export const createDefaultBuilderState = () => ({
   },
   history: {
     layout: 'table',
-    surfaceColor: '#0c1728',
-    textColor: '#e2e8f0',
-    headerColor: '#3dd9c5'
-  }
+    surfaceColor: '#ffffff',
+    textColor: '#1e293b',
+    headerColor: '#2563eb'
+  },
+  routes: defaultRoutes
 });
 
 export const mergeBuilderState = (source) => {
@@ -98,6 +135,13 @@ export const mergeBuilderState = (source) => {
     history: {
       ...defaults.history,
       ...source.history
-    }
+    },
+    routes:
+      Array.isArray(source.routes) && source.routes.length
+        ? source.routes.map((route, index) => ({
+            ...defaults.routes[index % defaults.routes.length],
+            ...route
+          }))
+        : defaults.routes
   };
 };
