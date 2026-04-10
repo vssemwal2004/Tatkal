@@ -37,6 +37,18 @@ const LoginBuilder = ({ config, updateSection }) => (
     </ControlSection>
 
     <ControlSection subtitle="Control which fields appear on the separate register page." title="Register Page">
+      <TextField
+        label="Register headline"
+        onChange={(registerHeadline) => updateSection({ registerHeadline })}
+        placeholder="Create account"
+        value={config.registerHeadline}
+      />
+      <TextField
+        label="Register subheading"
+        onChange={(registerSubheading) => updateSection({ registerSubheading })}
+        placeholder="Guide customers through account creation"
+        value={config.registerSubheading}
+      />
       <ToggleField checked={config.signUpName} label="Name" onChange={(signUpName) => updateSection({ signUpName })} />
       <ToggleField
         checked={config.signUpEmail}

@@ -49,6 +49,8 @@ export const createDefaultBuilderState = () => ({
     logo: '',
     headline: 'Welcome back',
     subheading: 'Book routes faster with a cleaner and more reliable travel experience.',
+    registerHeadline: 'Create customer account',
+    registerSubheading: 'Register to start booking routes and managing seats.',
     showUsername: true,
     showPassword: true,
     showForgotPassword: true,
