@@ -9,6 +9,9 @@ const paymentSchema = new mongoose.Schema(
     orderId: { type: String, required: true, unique: true },
     paymentId: { type: String, default: null, unique: true, sparse: true },
     status: { type: String, enum: ['created', 'verified', 'failed'], default: 'created' },
+    lockId: { type: mongoose.Schema.Types.ObjectId, ref: 'SeatLock', default: null },
+    routeId: { type: String, default: null },
+    seatId: { type: String, default: null },
     failureReason: { type: String, default: null }
   },
   { timestamps: true }

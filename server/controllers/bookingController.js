@@ -1,7 +1,7 @@
 const Booking = require('../models/Booking');
 const SeatLock = require('../models/SeatLock');
 const Payment = require('../models/Payment');
-const { ensureClientAccess } = require('../utils/clientAccess');
+const { ensureClientAccess, ensureClientActive } = require('../utils/clientAccess');
 
 const lockSeat = async (req, res, next) => {
   try {
@@ -11,7 +11,7 @@ const lockSeat = async (req, res, next) => {
       return res.status(400).json({ message: 'clientId, routeId, and seatId are required' });
     }
 
-    const accessibleClient = await ensureClientAccess(req, res, clientId);
+    const accessibleClient = await ensureClientActive(req, res, clientId);
     if (!accessibleClient) {
       return null;
     }
@@ -87,7 +87,7 @@ const confirmBooking = async (req, res, next) => {
       return res.status(404).json({ message: 'Seat lock not found' });
     }
 
-    const accessibleClient = await ensureClientAccess(req, res, lock.clientId);
+    const accessibleClient = await ensureClientActive(req, res, lock.clientId);
     if (!accessibleClient) {
       return null;
     }
@@ -158,7 +158,7 @@ const releaseSeatLock = async (req, res, next) => {
       return res.status(404).json({ message: 'Seat lock not found' });
     }
 
-    const accessibleClient = await ensureClientAccess(req, res, lock.clientId);
+    const accessibleClient = await ensureClientActive(req, res, lock.clientId);
     if (!accessibleClient) {
       return null;
     }
@@ -194,7 +194,7 @@ const getHistory = async (req, res, next) => {
     const filter = { userId: req.user.id };
 
     if (clientId) {
-      const accessibleClient = await ensureClientAccess(req, res, clientId);
+      const accessibleClient = await ensureClientActive(req, res, clientId);
       if (!accessibleClient) {
         return null;
       }

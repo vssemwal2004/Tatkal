@@ -1,7 +1,9 @@
 const crypto = require('crypto');
 const Razorpay = require('razorpay');
+const Booking = require('../models/Booking');
 const Payment = require('../models/Payment');
-const { ensureClientAccess } = require('../utils/clientAccess');
+const SeatLock = require('../models/SeatLock');
+const { ensureClientActive } = require('../utils/clientAccess');
 
 const getRazorpayClient = () => {
   const keyId = process.env.RAZORPAY_KEY_ID;
@@ -16,15 +18,39 @@ const getRazorpayClient = () => {
 
 const createOrder = async (req, res, next) => {
   try {
-    const { amount, clientId } = req.body;
+    const { amount, lockId } = req.body;
 
-    if (!amount || !clientId) {
-      return res.status(400).json({ message: 'amount and clientId are required' });
+    if (!amount || !lockId) {
+      return res.status(400).json({ message: 'amount and lockId are required' });
     }
 
-    const accessibleClient = await ensureClientAccess(req, res, clientId);
+    const lock = await SeatLock.findById(lockId);
+    if (!lock) {
+      return res.status(404).json({ message: 'Seat lock not found' });
+    }
+
+    const accessibleClient = await ensureClientActive(req, res, lock.clientId);
     if (!accessibleClient) {
       return null;
+    }
+
+    if (lock.userId.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'You do not own this seat lock' });
+    }
+
+    if (lock.status !== 'locked' || lock.expiresAt <= new Date()) {
+      return res.status(400).json({ message: 'Seat lock expired' });
+    }
+
+    const alreadyBooked = await Booking.findOne({
+      clientId: lock.clientId,
+      routeId: lock.routeId,
+      seatId: lock.seatId,
+      status: 'confirmed'
+    }).lean();
+
+    if (alreadyBooked) {
+      return res.status(409).json({ message: 'Seat already booked' });
     }
 
     const razorpay = getRazorpayClient();
@@ -39,12 +65,15 @@ const createOrder = async (req, res, next) => {
     });
 
     await Payment.create({
-      clientId,
+      clientId: lock.clientId,
       userId: req.user.id,
       amount: Number(amount),
       currency: 'INR',
       orderId: order.id,
-      status: 'created'
+      status: 'created',
+      lockId: lock._id,
+      routeId: lock.routeId,
+      seatId: lock.seatId
     });
 
     return res.status(200).json({
@@ -82,7 +111,7 @@ const verifyPayment = async (req, res, next) => {
       return res.status(404).json({ message: 'Payment order not found' });
     }
 
-    const accessibleClient = await ensureClientAccess(req, res, existing.clientId);
+    const accessibleClient = await ensureClientActive(req, res, existing.clientId);
     if (!accessibleClient) {
       return null;
     }
@@ -128,7 +157,7 @@ const markFailed = async (req, res, next) => {
       return res.status(404).json({ message: 'Payment order not found' });
     }
 
-    const accessibleClient = await ensureClientAccess(req, res, existing.clientId);
+    const accessibleClient = await ensureClientActive(req, res, existing.clientId);
     if (!accessibleClient) {
       return null;
     }
@@ -151,6 +180,13 @@ const markFailed = async (req, res, next) => {
       }
     );
 
+    if (existing.lockId) {
+      await SeatLock.updateOne(
+        { _id: existing.lockId, status: 'locked' },
+        { $set: { status: 'expired' } }
+      );
+    }
+
     return res.status(200).json({
       message: 'Payment marked as failed',
       orderId
@@ -160,8 +196,71 @@ const markFailed = async (req, res, next) => {
   }
 };
 
+const handleWebhook = async (req, res, next) => {
+  try {
+    const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
+    if (!webhookSecret) {
+      return res.status(501).json({ message: 'Razorpay webhook secret is not configured.' });
+    }
+
+    const signature = req.headers['x-razorpay-signature'];
+    const payload = req.body instanceof Buffer ? req.body.toString('utf8') : JSON.stringify(req.body || {});
+
+    const expected = crypto.createHmac('sha256', webhookSecret).update(payload).digest('hex');
+    if (expected !== signature) {
+      return res.status(400).json({ message: 'Invalid webhook signature' });
+    }
+
+    const body = req.body instanceof Buffer ? JSON.parse(payload) : req.body;
+    const event = body?.event;
+    const paymentEntity = body?.payload?.payment?.entity || {};
+    const orderId = paymentEntity?.order_id;
+    const paymentId = paymentEntity?.id;
+
+    if (!orderId) {
+      return res.status(200).json({ status: 'ignored' });
+    }
+
+    const payment = await Payment.findOne({ orderId });
+    if (!payment) {
+      return res.status(200).json({ status: 'ignored' });
+    }
+
+    if (event === 'payment.captured') {
+      if (payment.status !== 'verified') {
+        payment.status = 'verified';
+        payment.paymentId = paymentId || payment.paymentId;
+        await payment.save();
+      }
+      return res.status(200).json({ status: 'ok' });
+    }
+
+    if (event === 'payment.failed') {
+      if (payment.status !== 'failed') {
+        payment.status = 'failed';
+        payment.failureReason = paymentEntity?.error_description || 'payment_failed';
+        await payment.save();
+      }
+
+      if (payment.lockId) {
+        await SeatLock.updateOne(
+          { _id: payment.lockId, status: 'locked' },
+          { $set: { status: 'expired' } }
+        );
+      }
+
+      return res.status(200).json({ status: 'ok' });
+    }
+
+    return res.status(200).json({ status: 'ignored' });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 module.exports = {
   createOrder,
   verifyPayment,
+  handleWebhook,
   markFailed
 };

@@ -15,6 +15,7 @@ const deployRoutes = require('./routes/deployRoutes');
 const clientRoutes = require('./routes/clientRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
+const { handleWebhook } = require('./controllers/paymentController');
 const ensureAdminUser = require('./utils/seedAdmin');
 
 const app = express();
@@ -33,6 +34,9 @@ app.use(
 );
 
 app.use(morgan('dev'));
+
+app.post('/api/payment/webhook', express.raw({ type: 'application/json' }), handleWebhook);
+
 app.use(express.json({ limit: '2mb' }));
 
 app.get('/api/health', (req, res) => {

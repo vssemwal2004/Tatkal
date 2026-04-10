@@ -575,7 +575,8 @@ function renderPayment() {
         method: 'POST',
         body: {
           amount: Number(route.price || 0),
-          clientId
+          clientId,
+          lockId: booking.lockId
         }
       });
 
@@ -604,7 +605,22 @@ function renderPayment() {
                 signature: response.razorpay_signature
               }
             });
+          } catch (error) {
+            await api('/payment/failed', {
+              method: 'POST',
+              body: {
+                orderId: order.orderId,
+                reason: error.message || 'verification_failed'
+              }
+            });
+            await releaseSeatLock(booking.lockId);
+            saveBooking(null);
+            paymentError.innerHTML = `<div class="alert error">${error.message}</div>`;
+            navigate(`/seats?routeId=${encodeURIComponent(routeId)}`);
+            return;
+          }
 
+          try {
             await api('/booking/confirm', {
               method: 'POST',
               body: {
@@ -621,17 +637,7 @@ function renderPayment() {
             saveBooking(null);
             navigate('/history');
           } catch (error) {
-            await api('/payment/failed', {
-              method: 'POST',
-              body: {
-                orderId: order.orderId,
-                reason: error.message || 'verification_failed'
-              }
-            });
-            await releaseSeatLock(booking.lockId);
-            saveBooking(null);
             paymentError.innerHTML = `<div class="alert error">${error.message}</div>`;
-            navigate(`/seats?routeId=${encodeURIComponent(routeId)}`);
           }
         },
         modal: {

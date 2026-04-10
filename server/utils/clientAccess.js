@@ -48,7 +48,18 @@ const ensureClientAccess = async (req, res, clientId) => {
   return access.client;
 };
 
+const ensureClientActive = async (req, res, clientId) => {
+  const access = await getClientAccess(clientId);
+  if (!access.allowed) {
+    res.status(access.statusCode).json({ message: access.message });
+    return null;
+  }
+
+  return access.client;
+};
+
 module.exports = {
   ensureClientAccess,
+  ensureClientActive,
   getClientAccess
 };
