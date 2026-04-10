@@ -145,6 +145,49 @@ const confirmBooking = async (req, res, next) => {
   }
 };
 
+const releaseSeatLock = async (req, res, next) => {
+  try {
+    const { lockId } = req.body;
+
+    if (!lockId) {
+      return res.status(400).json({ message: 'lockId is required' });
+    }
+
+    const lock = await SeatLock.findById(lockId);
+    if (!lock) {
+      return res.status(404).json({ message: 'Seat lock not found' });
+    }
+
+    const accessibleClient = await ensureClientAccess(req, res, lock.clientId);
+    if (!accessibleClient) {
+      return null;
+    }
+
+    if (lock.userId.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'You do not own this seat lock' });
+    }
+
+    if (lock.status === 'confirmed') {
+      return res.status(409).json({ message: 'Seat lock already confirmed' });
+    }
+
+    if (lock.status === 'expired' || lock.expiresAt <= new Date()) {
+      if (lock.status !== 'expired') {
+        lock.status = 'expired';
+        await lock.save();
+      }
+      return res.status(200).json({ message: 'Seat lock expired' });
+    }
+
+    lock.status = 'expired';
+    await lock.save();
+
+    return res.status(200).json({ message: 'Seat lock released' });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 const getHistory = async (req, res, next) => {
   try {
     const clientId = req.query.clientId || req.user.clientId;
@@ -182,5 +225,6 @@ const getHistory = async (req, res, next) => {
 module.exports = {
   lockSeat,
   confirmBooking,
+  releaseSeatLock,
   getHistory
 };

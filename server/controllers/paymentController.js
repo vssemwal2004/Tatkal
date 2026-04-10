@@ -51,7 +51,8 @@ const createOrder = async (req, res, next) => {
       message: 'Payment order created',
       orderId: order.id,
       amount: Number(amount),
-      currency: 'INR'
+      currency: 'INR',
+      keyId: process.env.RAZORPAY_KEY_ID
     });
   } catch (error) {
     return next(error);
@@ -114,7 +115,53 @@ const verifyPayment = async (req, res, next) => {
   }
 };
 
+const markFailed = async (req, res, next) => {
+  try {
+    const { orderId, reason } = req.body;
+
+    if (!orderId) {
+      return res.status(400).json({ message: 'orderId is required' });
+    }
+
+    const existing = await Payment.findOne({ orderId }).lean();
+    if (!existing) {
+      return res.status(404).json({ message: 'Payment order not found' });
+    }
+
+    const accessibleClient = await ensureClientAccess(req, res, existing.clientId);
+    if (!accessibleClient) {
+      return null;
+    }
+
+    if (req.user?.role !== 'admin' && existing.userId.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'You do not have access to this payment order' });
+    }
+
+    if (existing.status === 'verified') {
+      return res.status(409).json({ message: 'Payment already verified' });
+    }
+
+    await Payment.updateOne(
+      { orderId },
+      {
+        $set: {
+          status: 'failed',
+          failureReason: reason || null
+        }
+      }
+    );
+
+    return res.status(200).json({
+      message: 'Payment marked as failed',
+      orderId
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 module.exports = {
   createOrder,
-  verifyPayment
+  verifyPayment,
+  markFailed
 };

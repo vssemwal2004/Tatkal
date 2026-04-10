@@ -8,7 +8,8 @@ const paymentSchema = new mongoose.Schema(
     currency: { type: String, default: 'INR' },
     orderId: { type: String, required: true, unique: true },
     paymentId: { type: String, default: null, unique: true, sparse: true },
-    status: { type: String, enum: ['created', 'verified', 'failed'], default: 'created' }
+    status: { type: String, enum: ['created', 'verified', 'failed'], default: 'created' },
+    failureReason: { type: String, default: null }
   },
   { timestamps: true }
 );

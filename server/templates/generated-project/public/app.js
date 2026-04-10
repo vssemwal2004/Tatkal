@@ -28,6 +28,32 @@ function saveBooking(booking) {
   localStorage.setItem(BOOKING_KEY, JSON.stringify(booking));
 }
 
+function remainingMs(expiresAt) {
+  if (!expiresAt) return 0;
+  const expiry = new Date(expiresAt).getTime();
+  if (Number.isNaN(expiry)) return 0;
+  return expiry - Date.now();
+}
+
+function formatCountdown(ms) {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+  const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+  const seconds = String(totalSeconds % 60).padStart(2, '0');
+  return `${minutes}:${seconds}`;
+}
+
+async function releaseSeatLock(lockId) {
+  if (!lockId) return;
+  try {
+    await api('/api/bookings/release', {
+      method: 'POST',
+      body: { lockId }
+    });
+  } catch (error) {
+    // Ignore release failures to avoid blocking UI.
+  }
+}
+
 function loadToken() {
   return localStorage.getItem(SESSION_KEY) || '';
 }
@@ -511,7 +537,8 @@ async function renderSeatsPage() {
         saveBooking({
           routeId,
           seatId: button.getAttribute('data-seat'),
-          lockId: response.lockId
+          lockId: response.lockId,
+          expiresAt: response.expiresAt
         });
         navigate(`/payment?routeId=${encodeURIComponent(routeId)}`);
       } catch (error) {
@@ -550,6 +577,11 @@ async function renderPaymentPage() {
           <div class="meta-label">Selected Route</div>
           <h2>${route.from} to ${route.to}</h2>
           <p class="helper spacer-top">${route.operator} · Seat ${booking.seatId}</p>
+          <div class="countdown">
+            <div class="meta-label">Seat hold</div>
+            <div class="countdown-timer" id="lock-timer">--:--</div>
+            <div class="helper">Complete payment before the timer ends.</div>
+          </div>
           <div class="payment-options spacer-top">
             ${options.map(([key]) => `<div class="summary-card"><strong>${key}</strong><p class="helper">Enabled from the approved client design.</p></div>`).join('')}
           </div>
@@ -571,10 +603,45 @@ async function renderPaymentPage() {
     </section>
   `);
 
+  const timerEl = document.getElementById('lock-timer');
+  let timerId = null;
+
+  const startCountdown = async () => {
+    if (!booking?.expiresAt || !timerEl) return;
+
+    const tick = async () => {
+      const msLeft = remainingMs(booking.expiresAt);
+      if (msLeft <= 0) {
+        clearInterval(timerId);
+        timerEl.textContent = '00:00';
+        await releaseSeatLock(booking.lockId);
+        saveBooking(null);
+        document.getElementById('payment-error').innerHTML = '<div class="alert error">Seat hold expired. Please select the seat again.</div>';
+        navigate(`/seats?routeId=${encodeURIComponent(routeId)}`);
+        return;
+      }
+      timerEl.textContent = formatCountdown(msLeft);
+    };
+
+    await tick();
+    timerId = setInterval(tick, 1000);
+  };
+
+  startCountdown();
+
   document.getElementById('payment-form')?.addEventListener('submit', async (event) => {
     event.preventDefault();
 
     try {
+      const msLeft = remainingMs(booking.expiresAt);
+      if (msLeft <= 0) {
+        await releaseSeatLock(booking.lockId);
+        saveBooking(null);
+        document.getElementById('payment-error').innerHTML = '<div class="alert error">Seat hold expired. Please select the seat again.</div>';
+        navigate(`/seats?routeId=${encodeURIComponent(routeId)}`);
+        return;
+      }
+
       const order = await api('/api/payments/create-order', {
         method: 'POST',
         body: {

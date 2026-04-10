@@ -491,6 +491,40 @@ const handleApiRequest = async (req, res, url) => {
     return;
   }
 
+  if (url.pathname === '/api/bookings/release' && req.method === 'POST') {
+    const user = getAuthenticatedUser(req, data);
+    if (!user) {
+      sendJson(res, 401, { message: 'Login required.' });
+      return;
+    }
+
+    const body = await parseBody(req);
+    const lockId = String(body.lockId || '').trim();
+
+    if (!lockId) {
+      sendJson(res, 400, { message: 'lockId is required.' });
+      return;
+    }
+
+    const lock = (data.seatLocks || []).find((item) => item.id === lockId && item.userId === user.id);
+
+    if (!lock) {
+      sendJson(res, 404, { message: 'Seat lock not found.' });
+      return;
+    }
+
+    if (lock.status === 'confirmed') {
+      sendJson(res, 409, { message: 'Seat lock already confirmed.' });
+      return;
+    }
+
+    lock.status = 'expired';
+    writeData(data);
+
+    sendJson(res, 200, { message: 'Seat lock released.' });
+    return;
+  }
+
   if (url.pathname === '/api/bookings/history' && req.method === 'GET') {
     const user = getAuthenticatedUser(req, data);
     if (!user) {

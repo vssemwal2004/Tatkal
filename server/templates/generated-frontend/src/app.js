@@ -59,6 +59,20 @@ function saveBooking(booking) {
   localStorage.setItem(BOOKING_KEY, JSON.stringify(booking));
 }
 
+function remainingMs(expiresAt) {
+  if (!expiresAt) return 0;
+  const expiry = new Date(expiresAt).getTime();
+  if (Number.isNaN(expiry)) return 0;
+  return expiry - Date.now();
+}
+
+function formatCountdown(ms) {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+  const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+  const seconds = String(totalSeconds % 60).padStart(2, '0');
+  return `${minutes}:${seconds}`;
+}
+
 function money(value) {
   return `INR ${Number(value || 0).toLocaleString('en-IN')}`;
 }
@@ -105,6 +119,18 @@ async function api(path, options = {}) {
   }
 
   return payload;
+}
+
+async function releaseSeatLock(lockId) {
+  if (!lockId) return;
+  try {
+    await api('/booking/release', {
+      method: 'POST',
+      body: { lockId }
+    });
+  } catch (error) {
+    // Swallow release errors to avoid blocking UI flows.
+  }
 }
 
 function navigate(path) {
@@ -447,7 +473,8 @@ function renderSeats() {
         saveBooking({
           routeId,
           seatId: button.getAttribute('data-seat'),
-          lockId: response.lockId
+          lockId: response.lockId,
+          expiresAt: response.expiresAt
         });
         navigate(`/payment?routeId=${encodeURIComponent(routeId)}`);
       } catch (error) {
@@ -481,6 +508,11 @@ function renderPayment() {
           <div class="meta-label">Route</div>
           <h2>${route.from} to ${route.to}</h2>
           <p class="helper spacer-top">Seat ${booking.seatId}</p>
+          <div class="countdown">
+            <div class="meta-label">Seat hold</div>
+            <div class="countdown-timer" id="lock-timer">--:--</div>
+            <div class="helper">Complete payment before the timer ends.</div>
+          </div>
         </div>
         <div class="section">
           <h2>${money(route.price)}</h2>
@@ -497,11 +529,49 @@ function renderPayment() {
     </section>
   `);
 
+  const timerEl = document.getElementById('lock-timer');
+  let timerId = null;
+
+  const startCountdown = async () => {
+    if (!booking?.expiresAt || !timerEl) return;
+
+    const tick = async () => {
+      const msLeft = remainingMs(booking.expiresAt);
+      if (msLeft <= 0) {
+        clearInterval(timerId);
+        timerEl.textContent = '00:00';
+        await releaseSeatLock(booking.lockId);
+        saveBooking(null);
+        document.getElementById('payment-error').innerHTML = '<div class="alert error">Seat hold expired. Please select the seat again.</div>';
+        navigate(`/seats?routeId=${encodeURIComponent(routeId)}`);
+        return;
+      }
+      timerEl.textContent = formatCountdown(msLeft);
+    };
+
+    await tick();
+    timerId = setInterval(tick, 1000);
+  };
+
+  startCountdown();
+
   document.getElementById('payment-form')?.addEventListener('submit', async (event) => {
     event.preventDefault();
 
+    const paymentError = document.getElementById('payment-error');
+    paymentError.innerHTML = '';
+
     try {
-      await api('/payment/create-order', {
+      const msLeft = remainingMs(booking.expiresAt);
+      if (msLeft <= 0) {
+        await releaseSeatLock(booking.lockId);
+        saveBooking(null);
+        paymentError.innerHTML = '<div class="alert error">Seat hold expired. Please select the seat again.</div>';
+        navigate(`/seats?routeId=${encodeURIComponent(routeId)}`);
+        return;
+      }
+
+      const order = await api('/payment/create-order', {
         method: 'POST',
         body: {
           amount: Number(route.price || 0),
@@ -509,19 +579,96 @@ function renderPayment() {
         }
       });
 
-      await api('/booking/confirm', {
-        method: 'POST',
-        body: {
-          lockId: booking.lockId,
-          amount: Number(route.price || 0),
-          currency: 'INR'
+      if (!window.Razorpay) {
+        throw new Error('Razorpay checkout is not available.');
+      }
+
+      const options = {
+        key: order.keyId,
+        amount: Math.round(Number(order.amount || 0) * 100),
+        currency: order.currency || 'INR',
+        name: project.projectName || 'TATKAL',
+        description: `Seat ${booking.seatId}`,
+        order_id: order.orderId,
+        prefill: {
+          name: state.user?.name || '',
+          email: state.user?.email || ''
+        },
+        handler: async (response) => {
+          try {
+            await api('/payment/verify', {
+              method: 'POST',
+              body: {
+                orderId: response.razorpay_order_id,
+                paymentId: response.razorpay_payment_id,
+                signature: response.razorpay_signature
+              }
+            });
+
+            await api('/booking/confirm', {
+              method: 'POST',
+              body: {
+                lockId: booking.lockId,
+                amount: Number(route.price || 0),
+                currency: 'INR',
+                payment: {
+                  orderId: response.razorpay_order_id,
+                  paymentId: response.razorpay_payment_id
+                }
+              }
+            });
+
+            saveBooking(null);
+            navigate('/history');
+          } catch (error) {
+            await api('/payment/failed', {
+              method: 'POST',
+              body: {
+                orderId: order.orderId,
+                reason: error.message || 'verification_failed'
+              }
+            });
+            await releaseSeatLock(booking.lockId);
+            saveBooking(null);
+            paymentError.innerHTML = `<div class="alert error">${error.message}</div>`;
+            navigate(`/seats?routeId=${encodeURIComponent(routeId)}`);
+          }
+        },
+        modal: {
+          ondismiss: async () => {
+            await api('/payment/failed', {
+              method: 'POST',
+              body: {
+                orderId: order.orderId,
+                reason: 'dismissed'
+              }
+            });
+            await releaseSeatLock(booking.lockId);
+            saveBooking(null);
+            paymentError.innerHTML = '<div class="alert error">Payment cancelled. Please try again.</div>';
+            navigate(`/seats?routeId=${encodeURIComponent(routeId)}`);
+          }
         }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', async (response) => {
+        await api('/payment/failed', {
+          method: 'POST',
+          body: {
+            orderId: order.orderId,
+            reason: response?.error?.description || 'payment_failed'
+          }
+        });
+        await releaseSeatLock(booking.lockId);
+        saveBooking(null);
+        paymentError.innerHTML = `<div class="alert error">${response?.error?.description || 'Payment failed. Please try again.'}</div>`;
+        navigate(`/seats?routeId=${encodeURIComponent(routeId)}`);
       });
 
-      saveBooking(null);
-      navigate('/history');
+      rzp.open();
     } catch (error) {
-      document.getElementById('payment-error').innerHTML = `<div class="alert error">${error.message}</div>`;
+      paymentError.innerHTML = `<div class="alert error">${error.message}</div>`;
     }
   });
 }

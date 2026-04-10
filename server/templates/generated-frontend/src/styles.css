@@ -292,6 +292,22 @@ button {
   border: 1px solid rgba(74, 222, 128, 0.28);
 }
 
+.countdown {
+  margin-top: 18px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(248, 250, 252, 0.9);
+  display: grid;
+  gap: 6px;
+}
+
+.countdown-timer {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--brand-strong);
+}
+
 .metric-grid,
 .result-list,
 .history-grid,

@@ -13,5 +13,12 @@ const seatLockSchema = new mongoose.Schema(
 );
 
 seatLockSchema.index({ clientId: 1, routeId: 1, seatId: 1, status: 1 });
+seatLockSchema.index(
+  { expiresAt: 1 },
+  {
+    expireAfterSeconds: 0,
+    partialFilterExpression: { status: 'locked' }
+  }
+);
 
 module.exports = mongoose.model('SeatLock', seatLockSchema);
