@@ -6,6 +6,7 @@ const morgan = require('morgan');
 
 const connectDB = require('./config/db');
 const { requireAdmin, verifyToken } = require('./middleware/auth');
+const { ensureFullBackendEnabled } = require('./middleware/fullBackendAccess');
 const { errorHandler, notFound } = require('./middleware/errorHandler');
 const authRoutes = require('./routes/authRoutes');
 const clientPortalRoutes = require('./routes/clientPortalRoutes');
@@ -14,8 +15,12 @@ const requestRoutes = require('./routes/requestRoutes');
 const deployRoutes = require('./routes/deployRoutes');
 const clientRoutes = require('./routes/clientRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
+const bookingCompatRoutes = require('./routes/bookingCompatRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const fullBackendRoutes = require('./routes/fullBackendRoutes');
+const ownerRoutes = require('./routes/ownerRoutes');
+const routeRoutes = require('./routes/routeRoutes');
+const busRoutes = require('./routes/busRoutes');
 const { handleWebhook } = require('./controllers/paymentController');
 const ensureAdminUser = require('./utils/seedAdmin');
 
@@ -55,6 +60,8 @@ app.use('/api', (req, res, next) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/routes', ensureFullBackendEnabled, routeRoutes);
+app.use('/api/buses', ensureFullBackendEnabled, busRoutes);
 app.use('/api/design', verifyToken, designRoutes);
 app.use('/api/client', verifyToken, clientPortalRoutes);
 app.use('/api/client', verifyToken, fullBackendRoutes);
@@ -62,8 +69,10 @@ app.use('/api/admin', verifyToken, requireAdmin, requestRoutes);
 app.use('/api/admin', verifyToken, requireAdmin, deployRoutes);
 app.use('/api/admin', verifyToken, requireAdmin, clientRoutes);
 app.use('/api/admin', verifyToken, requireAdmin, fullBackendRoutes);
-app.use('/api/booking', verifyToken, bookingRoutes);
-app.use('/api/payment', verifyToken, paymentRoutes);
+app.use('/api/owner', verifyToken, ensureFullBackendEnabled, ownerRoutes);
+app.use('/api/booking', verifyToken, ensureFullBackendEnabled, bookingRoutes);
+app.use('/api/bookings', verifyToken, ensureFullBackendEnabled, bookingCompatRoutes);
+app.use('/api/payment', verifyToken, ensureFullBackendEnabled, paymentRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

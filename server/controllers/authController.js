@@ -90,7 +90,7 @@ const buildClientSession = (user, client) => ({
 
 const register = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, name, role, source } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ message: 'Email and password are required' });
@@ -108,17 +108,22 @@ const register = async (req, res, next) => {
       return res.status(409).json({ message: 'An account with this email already exists' });
     }
 
+    const isExternal = role === 'user' || source === 'external';
+    const userRole = isExternal ? 'user' : 'client';
+
     await User.create({
       email: normalizedEmail,
       password,
-      role: 'client'
+      role: userRole,
+      name: name || null
     });
 
     return res.status(201).json({
-      message: 'Client account created successfully',
+      message: 'Account created successfully',
       user: {
         email: normalizedEmail,
-        role: 'client'
+        role: userRole,
+        name: name || normalizedEmail.split('@')[0]
       }
     });
   } catch (error) {
@@ -178,7 +183,7 @@ const login = async (req, res, next) => {
 
     const user = await User.findOne({ email: normalizedEmail }).select('+password');
 
-    if (!user || user.role !== 'client') {
+    if (!user || (user.role !== 'client' && user.role !== 'user')) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
@@ -188,19 +193,38 @@ const login = async (req, res, next) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const client = await ensureClientProfile(user);
+    if (user.role === 'client') {
+      const client = await ensureClientProfile(user);
+      const token = signToken({
+        id: user._id,
+        email: user.email,
+        role: user.role,
+        clientId: client.clientId
+      });
+
+      return res.status(200).json({
+        message: 'Login successful',
+        token,
+        role: user.role,
+        user: buildClientSession(user, client)
+      });
+    }
+
     const token = signToken({
       id: user._id,
       email: user.email,
-      role: user.role,
-      clientId: client.clientId
+      role: user.role
     });
 
     return res.status(200).json({
       message: 'Login successful',
       token,
       role: user.role,
-      user: buildClientSession(user, client)
+      user: {
+        email: user.email,
+        role: user.role,
+        name: user.name || user.email.split('@')[0]
+      }
     });
   } catch (error) {
     if (error.statusCode) {
@@ -211,8 +235,49 @@ const login = async (req, res, next) => {
   }
 };
 
+const getMe = async (req, res, next) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    if (req.user.role === 'client' && req.user.clientId) {
+      const client = await Client.findOne({ clientId: req.user.clientId }).lean();
+      if (!client) {
+        return res.status(404).json({ message: 'Client not found' });
+      }
+
+      return res.status(200).json({
+        user: {
+          email: req.user.email,
+          role: req.user.role,
+          clientId: req.user.clientId,
+          name: client.name,
+          businessType: client.businessType
+        }
+      });
+    }
+
+    const user = await User.findById(req.user.id).lean();
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    return res.status(200).json({
+      user: {
+        email: user.email,
+        role: user.role,
+        name: user.name || user.email.split('@')[0]
+      }
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 module.exports = {
   ensureClientProfile,
   login,
-  register
+  register,
+  getMe
 };
