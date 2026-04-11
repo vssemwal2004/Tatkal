@@ -50,7 +50,7 @@ const RegisterPage = () => {
                 <img
                   src="/logo.png"
                   alt="Tatkal"
-                  className="h-14 w-auto select-none"
+                  className="h-[4.2rem] w-auto select-none"
                   draggable="false"
                 />
 
