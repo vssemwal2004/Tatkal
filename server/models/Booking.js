@@ -18,6 +18,13 @@ const bookingSchema = new mongoose.Schema(
 );
 
 bookingSchema.index({ clientId: 1, routeId: 1, seatId: 1, status: 1 });
+bookingSchema.index(
+  { clientId: 1, routeId: 1, seatId: 1, status: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { status: 'confirmed' }
+  }
+);
 bookingSchema.index({ clientId: 1, userId: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Booking', bookingSchema);

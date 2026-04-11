@@ -2,6 +2,7 @@ const Booking = require('../models/Booking');
 const SeatLock = require('../models/SeatLock');
 const Payment = require('../models/Payment');
 const { ensureClientAccess, ensureClientActive } = require('../utils/clientAccess');
+const { acquireLock, releaseLock } = require('../utils/redisLock');
 
 const lockSeat = async (req, res, next) => {
   try {
@@ -16,59 +17,70 @@ const lockSeat = async (req, res, next) => {
       return null;
     }
 
-    const now = new Date();
-    await SeatLock.deleteMany({
-      clientId,
-      routeId,
-      seatId,
-      status: 'locked',
-      expiresAt: { $lte: now }
-    });
-
-    const alreadyBooked = await Booking.findOne({
-      clientId,
-      routeId,
-      seatId,
-      status: 'confirmed'
-    }).lean();
-
-    if (alreadyBooked) {
-      return res.status(409).json({ message: 'Seat already booked' });
-    }
-    const existing = await SeatLock.findOne({
-      clientId,
-      routeId,
-      seatId,
-      status: 'locked',
-      expiresAt: { $gt: now }
-    }).lean();
-
-    if (existing) {
+    const lockKey = `seatlock:${clientId}:${routeId}:${seatId}`;
+    const lockToken = await acquireLock(lockKey, 5000);
+    if (!lockToken) {
       return res.status(409).json({ message: 'Seat already locked' });
     }
 
-    const expiresAt = new Date(Date.now() + Number(holdMinutes) * 60 * 1000);
     let lock;
     try {
-      lock = await SeatLock.create({
+      const now = new Date();
+      await SeatLock.deleteMany({
         clientId,
         routeId,
         seatId,
-        userId: req.user.id,
-        expiresAt
+        status: 'locked',
+        expiresAt: { $lte: now }
       });
-    } catch (error) {
-      if (error.code === 11000) {
+
+      const alreadyBooked = await Booking.findOne({
+        clientId,
+        routeId,
+        seatId,
+        status: 'confirmed'
+      }).lean();
+
+      if (alreadyBooked) {
+        return res.status(409).json({ message: 'Seat already booked' });
+      }
+      const existing = await SeatLock.findOne({
+        clientId,
+        routeId,
+        seatId,
+        status: 'locked',
+        expiresAt: { $gt: now }
+      }).lean();
+
+      if (existing) {
         return res.status(409).json({ message: 'Seat already locked' });
       }
-      throw error;
+
+      const expiresAt = new Date(Date.now() + Number(holdMinutes) * 60 * 1000);
+      try {
+        lock = await SeatLock.create({
+          clientId,
+          routeId,
+          seatId,
+          userId: req.user.id,
+          expiresAt
+        });
+      } catch (error) {
+        if (error.code === 11000) {
+          return res.status(409).json({ message: 'Seat already locked' });
+        }
+        throw error;
+      }
+
+      return res.status(200).json({
+        message: 'Seat locked',
+        lockId: lock._id,
+        expiresAt
+      });
+    } finally {
+      await releaseLock(lockKey, lockToken);
     }
 
-    return res.status(200).json({
-      message: 'Seat locked',
-      lockId: lock._id,
-      expiresAt
-    });
   } catch (error) {
     return next(error);
   }
@@ -92,14 +104,14 @@ const confirmBooking = async (req, res, next) => {
       return null;
     }
 
+    if (lock.userId.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'You do not own this seat lock' });
+    }
+
     if (lock.expiresAt <= new Date()) {
       lock.status = 'expired';
       await lock.save();
       return res.status(400).json({ message: 'Seat lock expired' });
-    }
-
-    if (lock.userId.toString() !== req.user.id) {
-      return res.status(403).json({ message: 'You do not own this seat lock' });
     }
 
     const alreadyBooked = await Booking.findOne({
@@ -110,6 +122,8 @@ const confirmBooking = async (req, res, next) => {
     }).lean();
 
     if (alreadyBooked) {
+      lock.status = 'expired';
+      await lock.save();
       return res.status(409).json({ message: 'Seat already booked' });
     }
 
@@ -120,21 +134,37 @@ const confirmBooking = async (req, res, next) => {
       }
     }
 
-    lock.status = 'confirmed';
-    await lock.save();
+    const confirmedLock = await SeatLock.findOneAndUpdate(
+      { _id: lockId, status: 'locked', userId: req.user.id, expiresAt: { $gt: new Date() } },
+      { $set: { status: 'confirmed' } },
+      { new: true }
+    );
 
-    const booking = await Booking.create({
-      clientId: lock.clientId,
-      routeId: lock.routeId,
-      seatId: lock.seatId,
-      userId: lock.userId,
-      amount,
-      currency,
-      payment: {
-        orderId: payment?.orderId || null,
-        paymentId: payment?.paymentId || null
+    if (!confirmedLock) {
+      return res.status(409).json({ message: 'Seat lock is not available' });
+    }
+
+    let booking;
+    try {
+      booking = await Booking.create({
+        clientId: confirmedLock.clientId,
+        routeId: confirmedLock.routeId,
+        seatId: confirmedLock.seatId,
+        userId: confirmedLock.userId,
+        amount,
+        currency,
+        payment: {
+          orderId: payment?.orderId || null,
+          paymentId: payment?.paymentId || null
+        }
+      });
+    } catch (error) {
+      if (error.code === 11000) {
+        await SeatLock.updateOne({ _id: confirmedLock._id }, { $set: { status: 'expired' } });
+        return res.status(409).json({ message: 'Seat already booked' });
       }
-    });
+      throw error;
+    }
 
     return res.status(201).json({
       message: 'Booking confirmed',

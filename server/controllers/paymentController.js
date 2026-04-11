@@ -42,6 +42,25 @@ const createOrder = async (req, res, next) => {
       return res.status(400).json({ message: 'Seat lock expired' });
     }
 
+    const existingPayment = await Payment.findOne({
+      lockId: lock._id,
+      status: { $in: ['created', 'verified'] }
+    }).lean();
+
+    if (existingPayment) {
+      if (existingPayment.status === 'verified') {
+        return res.status(409).json({ message: 'Payment already verified', orderId: existingPayment.orderId });
+      }
+
+      return res.status(200).json({
+        message: 'Payment order already created',
+        orderId: existingPayment.orderId,
+        amount: existingPayment.amount,
+        currency: existingPayment.currency,
+        keyId: process.env.RAZORPAY_KEY_ID
+      });
+    }
+
     const alreadyBooked = await Booking.findOne({
       clientId: lock.clientId,
       routeId: lock.routeId,
@@ -58,31 +77,61 @@ const createOrder = async (req, res, next) => {
       return res.status(501).json({ message: 'Razorpay keys are not configured on the server.' });
     }
 
-    const order = await razorpay.orders.create({
-      amount: Math.round(Number(amount) * 100),
-      currency: 'INR',
-      receipt: `rcpt_${Date.now()}`
-    });
+    const { acquireLock, releaseLock } = require('../utils/redisLock');
+    const paymentLockKey = `paymentlock:${lock._id}`;
+    const paymentToken = await acquireLock(paymentLockKey, 5000);
+    if (!paymentToken) {
+      return res.status(409).json({ message: 'Payment is already in progress' });
+    }
 
-    await Payment.create({
-      clientId: lock.clientId,
-      userId: req.user.id,
-      amount: Number(amount),
-      currency: 'INR',
-      orderId: order.id,
-      status: 'created',
-      lockId: lock._id,
-      routeId: lock.routeId,
-      seatId: lock.seatId
-    });
+    try {
+      const order = await razorpay.orders.create({
+        amount: Math.round(Number(amount) * 100),
+        currency: 'INR',
+        receipt: `rcpt_${Date.now()}`
+      });
 
-    return res.status(200).json({
-      message: 'Payment order created',
-      orderId: order.id,
-      amount: Number(amount),
-      currency: 'INR',
-      keyId: process.env.RAZORPAY_KEY_ID
-    });
+      try {
+        await Payment.create({
+          clientId: lock.clientId,
+          userId: req.user.id,
+          amount: Number(amount),
+          currency: 'INR',
+          orderId: order.id,
+          status: 'created',
+          lockId: lock._id,
+          routeId: lock.routeId,
+          seatId: lock.seatId
+        });
+      } catch (error) {
+        if (error.code === 11000) {
+          const existing = await Payment.findOne({
+            lockId: lock._id,
+            status: { $in: ['created', 'verified'] }
+          }).lean();
+          if (existing) {
+            return res.status(200).json({
+              message: 'Payment order already created',
+              orderId: existing.orderId,
+              amount: existing.amount,
+              currency: existing.currency,
+              keyId: process.env.RAZORPAY_KEY_ID
+            });
+          }
+        }
+        throw error;
+      }
+
+      return res.status(200).json({
+        message: 'Payment order created',
+        orderId: order.id,
+        amount: Number(amount),
+        currency: 'INR',
+        keyId: process.env.RAZORPAY_KEY_ID
+      });
+    } finally {
+      await releaseLock(paymentLockKey, paymentToken);
+    }
   } catch (error) {
     return next(error);
   }
@@ -121,18 +170,14 @@ const verifyPayment = async (req, res, next) => {
     }
 
     if (existing.status === 'verified') {
-      return res.status(409).json({ message: 'Payment already verified' });
+      return res.status(200).json({ message: 'Payment already verified', orderId, paymentId: existing.paymentId });
     }
 
-    await Payment.updateOne(
-      { orderId },
-      {
-        $set: {
-          paymentId,
-          status: 'verified'
-        }
-      }
-    );
+    if (existing.status === 'failed') {
+      return res.status(409).json({ message: 'Payment already marked as failed' });
+    }
+
+    await Payment.updateOne({ orderId, status: 'created' }, { $set: { paymentId, status: 'verified' } });
 
     return res.status(200).json({
       message: 'Payment verified',

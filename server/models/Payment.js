@@ -17,4 +17,12 @@ const paymentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+paymentSchema.index(
+  { lockId: 1, status: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { status: { $in: ['created', 'verified'] }, lockId: { $type: 'objectId' } }
+  }
+);
+
 module.exports = mongoose.model('Payment', paymentSchema);
