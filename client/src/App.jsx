@@ -6,6 +6,7 @@ import ProtectedRoute from './routes/ProtectedRoute';
 import BuilderEntryPage from './pages/BuilderEntryPage';
 import BuilderPage from './pages/BuilderPage';
 import BusinessTypePage from './pages/BusinessTypePage';
+import ClientDashboardPage from './pages/ClientDashboardPage';
 import ClientDashboardDesignPage from './pages/ClientDashboardDesignPage';
 import ClientHistoryDesignPage from './pages/ClientHistoryDesignPage';
 import ClientLoginDesignPage from './pages/ClientLoginDesignPage';
@@ -51,7 +52,8 @@ const App = () => (
 
     <Route element={<ProtectedRoute requiredRole="client" />}>
       <Route path="/client" element={<Navigate to="/client/dashboard" replace />} />
-      <Route path="/client/dashboard" element={<ClientWorkspacePage />} />
+      <Route path="/client/dashboard" element={<ClientDashboardPage />} />
+      <Route path="/client/workspace" element={<ClientWorkspacePage />} />
       <Route path="/client/builder-entry" element={<BuilderEntryPage />} />
       <Route path="/client/business-type" element={<BusinessTypePage />} />
       <Route path="/client/builder" element={<BuilderPage />} />

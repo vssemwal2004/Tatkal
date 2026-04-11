@@ -146,7 +146,7 @@ const BuilderStudioShell = ({ step }) => {
                     Previous
                   </Link>
                 ) : (
-                  <Link className="button-secondary" to="/client/dashboard">
+                  <Link className="button-secondary" to="/client/workspace">
                     <ArrowLeft className="mr-1 h-4 w-4" />
                     Dashboard
                   </Link>
