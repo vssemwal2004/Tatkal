@@ -6,23 +6,28 @@
 
 :root {
   color-scheme: light;
-  --color-primary: #B24BF3;
-  --color-secondary: #0D4361;
-  --color-bg: #ffffff;
-  --color-bg-tint: #f7fbff;
-
-  --tatkal-bg: linear-gradient(180deg, var(--color-bg) 0%, var(--color-bg-tint) 100%);
-  --tatkal-panel: rgba(255, 255, 255, 0.9);
-  --tatkal-border: rgba(148, 163, 184, 0.22);
+  --color-primary: #b24bf3;
+  --color-primary-dark: #9a38dd;
+  --color-secondary: #0d4361;
+  --color-bg: #f8fbff;
+  --color-surface: rgba(255, 255, 255, 0.94);
+  --color-border: rgba(13, 67, 97, 0.12);
+  --color-text: #0f172a;
+  --color-muted: #567082;
+  --tatkal-bg: linear-gradient(180deg, #ffffff 0%, #fbfdff 52%, #f4f9ff 100%);
+  --tatkal-panel: var(--color-surface);
+  --tatkal-border: var(--color-border);
 }
 
 body {
   @apply text-slate-900 antialiased;
   margin: 0;
   font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
+  background-color: var(--color-bg);
   background-image:
-    radial-gradient(circle at top left, rgba(178, 75, 243, 0.09), transparent 30%),
-    radial-gradient(circle at top right, rgba(13, 67, 97, 0.08), transparent 28%),
+    radial-gradient(circle at top left, rgba(178, 75, 243, 0.12), transparent 24%),
+    radial-gradient(circle at top right, rgba(13, 67, 97, 0.08), transparent 22%),
+    radial-gradient(circle at bottom center, rgba(178, 75, 243, 0.06), transparent 20%),
     var(--tatkal-bg);
   min-height: 100vh;
 }
@@ -59,15 +64,19 @@ h6 {
 }
 
 .input-field:focus {
-  @apply border-brand-400 ring-4 ring-brand-100;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(178, 75, 243, 0.14);
 }
 
 .primary-button {
-  @apply inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-brand-600 to-brand-500 px-5 py-3 text-sm font-semibold text-white transition;
+  @apply inline-flex items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold text-white transition;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  box-shadow: 0 14px 30px rgba(178, 75, 243, 0.18);
 }
 
 .primary-button:hover {
-  @apply -translate-y-0.5 shadow-[0_14px_32px_rgba(37,99,235,0.22)];
+  transform: translateY(-2px);
+  box-shadow: 0 18px 36px rgba(178, 75, 243, 0.24);
 }
 
 .secondary-button {
@@ -99,7 +108,8 @@ h6 {
 }
 
 .field-base:focus {
-  @apply border-brand-400 ring-4 ring-brand-100;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(178, 75, 243, 0.14);
 }
 
 .field-base:disabled {
@@ -107,11 +117,14 @@ h6 {
 }
 
 .button-primary {
-  @apply inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 px-4 py-2.5 text-sm font-semibold text-white transition;
+  @apply inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  box-shadow: 0 14px 30px rgba(178, 75, 243, 0.18);
 }
 
 .button-primary:hover {
-  @apply -translate-y-0.5 shadow-[0_14px_32px_rgba(37,99,235,0.22)];
+  transform: translateY(-2px);
+  box-shadow: 0 18px 36px rgba(178, 75, 243, 0.24);
 }
 
 .button-primary:disabled {
@@ -119,11 +132,14 @@ h6 {
 }
 
 .button-secondary {
-  @apply inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition;
+  @apply inline-flex items-center justify-center rounded-xl bg-white px-4 py-2.5 text-sm font-semibold transition;
+  border: 1px solid rgba(13, 67, 97, 0.14);
+  color: var(--color-secondary);
 }
 
 .button-secondary:hover {
-  @apply border-slate-300 bg-slate-50;
+  background: rgba(178, 75, 243, 0.05);
+  border-color: rgba(178, 75, 243, 0.24);
 }
 
 .button-secondary:disabled {
@@ -131,37 +147,48 @@ h6 {
 }
 
 .client-shell {
-  @apply mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-10;
+  @apply w-full px-5 py-8 sm:px-8 sm:py-10;
 }
 
 .client-section-title {
-  @apply text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-500;
+  @apply text-[10px] font-semibold uppercase tracking-[0.3em];
+  color: var(--color-muted);
 }
 
 .client-card {
-  @apply rounded-[28px] border border-slate-200 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.06)];
+  @apply rounded-[28px] bg-white;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 20px 45px rgba(13, 67, 97, 0.08);
 }
 
 .client-card-hover {
-  @apply transition;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease;
 }
 
 .client-card-hover:hover {
-  @apply -translate-y-0.5 border-brand-200 shadow-[0_20px_48px_rgba(15,23,42,0.08)];
+  transform: translateY(-4px);
+  border-color: rgba(178, 75, 243, 0.28);
+  box-shadow: 0 24px 52px rgba(13, 67, 97, 0.12);
 }
 
 .client-surface {
   background:
-    radial-gradient(circle at top left, rgba(59, 130, 246, 0.09), transparent 28%),
-    radial-gradient(circle at bottom right, rgba(249, 115, 22, 0.09), transparent 24%),
+    radial-gradient(circle at top left, rgba(178, 75, 243, 0.08), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(13, 67, 97, 0.08), transparent 24%),
     #fff;
 }
 
 .client-hero {
-  @apply border border-slate-200 shadow-[0_24px_70px_rgba(15,23,42,0.08)];
+  @apply border;
+  border-color: var(--color-border);
+  box-shadow: 0 28px 70px rgba(13, 67, 97, 0.1);
   background:
-    radial-gradient(circle at top right, rgba(59, 130, 246, 0.16), transparent 24%),
-    radial-gradient(circle at bottom left, rgba(249, 115, 22, 0.12), transparent 26%),
+    radial-gradient(circle at top right, rgba(178, 75, 243, 0.16), transparent 24%),
+    radial-gradient(circle at bottom left, rgba(13, 67, 97, 0.12), transparent 26%),
     linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.86));
 }
 
@@ -170,7 +197,9 @@ h6 {
 }
 
 .client-tab-active {
-  @apply border-brand-200 bg-brand-50 text-brand-700;
+  background: linear-gradient(135deg, rgba(178, 75, 243, 0.14), rgba(13, 67, 97, 0.08));
+  border-color: rgba(178, 75, 243, 0.28);
+  color: var(--color-secondary);
 }
 
 .client-tab-idle {
@@ -178,7 +207,8 @@ h6 {
 }
 
 .client-tab-idle:hover {
-  @apply border-slate-300 bg-slate-50;
+  background: rgba(178, 75, 243, 0.04);
+  border-color: rgba(178, 75, 243, 0.18);
 }
 
 .client-input-card {
@@ -187,7 +217,39 @@ h6 {
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(59, 130, 246, 0.38) rgba(226, 232, 240, 0.9);
+  scrollbar-color: rgba(178, 75, 243, 0.38) rgba(226, 232, 240, 0.9);
+}
+
+.client-header {
+  background: rgba(255, 255, 255, 0.8);
+  border-bottom: 1px solid rgba(13, 67, 97, 0.1);
+  backdrop-filter: blur(18px);
+}
+
+.client-logo-mark {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  box-shadow: 0 14px 30px rgba(178, 75, 243, 0.22);
+}
+
+.dashboard-grid {
+  @apply grid gap-5;
+}
+
+.dashboard-pill {
+  border: 1px solid rgba(178, 75, 243, 0.16);
+  background: rgba(178, 75, 243, 0.06);
+  color: var(--color-secondary);
+}
+
+.dashboard-tab-active {
+  background: linear-gradient(145deg, rgba(178, 75, 243, 0.14), rgba(13, 67, 97, 0.08));
+  border-color: rgba(178, 75, 243, 0.3);
+  box-shadow: 0 20px 36px rgba(178, 75, 243, 0.14);
+}
+
+.dashboard-tab-idle:hover {
+  background: rgba(178, 75, 243, 0.04);
+  border-color: rgba(178, 75, 243, 0.2);
 }
 
 @keyframes fade-rise {

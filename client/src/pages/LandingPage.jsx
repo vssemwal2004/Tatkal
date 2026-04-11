@@ -11,7 +11,7 @@ const LandingPage = () => {
 
   return (
     <main className="min-h-screen px-4 py-5 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-6xl rounded-[36px] border border-slate-200 bg-white/88 shadow-[0_30px_90px_rgba(15,23,42,0.08)] backdrop-blur-xl">
+      <div className="w-full rounded-[36px] border border-slate-200 bg-white/88 shadow-[0_30px_90px_rgba(15,23,42,0.08)] backdrop-blur-xl">
         <header className="flex items-center justify-between gap-4 border-b border-slate-200 px-5 py-4 sm:px-8">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-600 to-brand-400 text-xs font-bold tracking-[0.22em] text-white">

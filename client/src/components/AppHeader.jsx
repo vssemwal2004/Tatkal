@@ -1,93 +1,70 @@
-import { ArrowRight, LogOut, User } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { ArrowRight, ChevronDown, LogOut, UserCircle2 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { useAuth } from '../context/AuthContext';
 
 const AppHeader = () => {
-  const { client, isAuthenticated, role, logout, user } = useAuth();
-  const isClient = isAuthenticated && role === 'client';
-  const profileName = useMemo(() => client?.name || user?.name || 'Client', [client?.name, user?.name]);
-  const profileEmail = useMemo(() => client?.email || user?.email || '', [client?.email, user?.email]);
-  const [open, setOpen] = useState(false);
-  const menuRef = useRef(null);
+  const { client, isAuthenticated, role, logout } = useAuth();
+  const showDashboardLink = isAuthenticated && role === 'client';
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef(null);
 
   useEffect(() => {
-    if (!open) return undefined;
+    if (!profileOpen) {
+      return undefined;
+    }
 
-    const handlePointerDown = (event) => {
-      if (!menuRef.current) return;
-      if (!menuRef.current.contains(event.target)) {
-        setOpen(false);
+    const handleClickOutside = (event) => {
+      if (!profileRef.current?.contains(event.target)) {
+        setProfileOpen(false);
       }
     };
 
-    const handleEscape = (event) => {
-      if (event.key === 'Escape') {
-        setOpen(false);
-      }
-    };
+    document.addEventListener('mousedown', handleClickOutside);
 
-    document.addEventListener('pointerdown', handlePointerDown);
-    document.addEventListener('keydown', handleEscape);
     return () => {
-      document.removeEventListener('pointerdown', handlePointerDown);
-      document.removeEventListener('keydown', handleEscape);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [open]);
+  }, [profileOpen]);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3 sm:px-8">
-        <Link className="flex items-center" to={isClient ? '/client/dashboard' : '/'}>
-          <img src="/logo.png" alt="Tatkal" className="h-10 w-auto select-none" draggable="false" />
+    <header className="client-header sticky top-0 z-40">
+      <div className="flex w-full items-center justify-between gap-4 px-5 py-3 sm:px-8">
+        <Link className="flex items-center" to={showDashboardLink ? '/client/dashboard' : '/'}>
+          <div className="client-logo-mark flex h-11 w-11 items-center justify-center rounded-2xl text-xs font-bold tracking-[0.22em] text-white">
+            TK
+          </div>
         </Link>
 
         <div className="flex items-center gap-2">
-          {isClient ? (
-            <div className="relative" ref={menuRef}>
+          {showDashboardLink ? (
+            <div className="relative" ref={profileRef}>
               <button
                 type="button"
-                aria-haspopup="menu"
-                aria-expanded={open}
-                onClick={() => setOpen((current) => !current)}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-[color:var(--color-secondary)] shadow-[0_10px_24px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:shadow-[0_16px_34px_rgba(15,23,42,0.08)] focus:outline-none focus:ring-4 focus:ring-[color:rgba(178,75,243,0.18)]"
+                onClick={() => setProfileOpen((current) => !current)}
+                className="inline-flex items-center gap-2 rounded-full border border-[rgba(13,67,97,0.12)] bg-white px-3 py-2 text-sm text-[var(--color-secondary)] shadow-[0_12px_28px_rgba(13,67,97,0.08)] transition hover:border-[rgba(178,75,243,0.24)] hover:bg-[rgba(178,75,243,0.04)]"
               >
-                <User className="h-5 w-5" />
+                <UserCircle2 className="h-5 w-5 text-[var(--color-primary)]" />
+                <ChevronDown className={`h-4 w-4 transition ${profileOpen ? 'rotate-180' : ''}`} />
               </button>
 
-              {open ? (
-                <div
-                  role="menu"
-                  className="absolute right-0 mt-3 w-72 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_22px_60px_rgba(15,23,42,0.14)]"
-                >
-                  <div className="px-4 py-4">
-                    <p className="text-sm font-semibold text-slate-950">{profileName}</p>
-                    {profileEmail ? <p className="mt-1 text-sm text-slate-600">{profileEmail}</p> : null}
+              {profileOpen ? (
+                <div className="absolute right-0 mt-3 w-72 rounded-[24px] border border-[rgba(13,67,97,0.12)] bg-white p-4 shadow-[0_24px_50px_rgba(13,67,97,0.12)]">
+                  <div className="rounded-[20px] bg-[linear-gradient(135deg,rgba(178,75,243,0.12),rgba(13,67,97,0.07))] p-4">
+                    <p className="text-sm font-semibold text-slate-950">{client?.name || 'Client'}</p>
+                    <p className="mt-1 text-sm text-[var(--color-muted)]">{client?.email || 'No email available'}</p>
                   </div>
 
-                  <div className="border-t border-slate-200 p-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setOpen(false);
-                        logout();
-                      }}
-                      className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                      role="menuitem"
-                    >
-                      <span>Logout</span>
-                      <LogOut className="h-4 w-4" />
-                    </button>
-                  </div>
+                  <button className="button-secondary mt-4 w-full justify-center" onClick={logout} type="button">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
+                  </button>
                 </div>
               ) : null}
             </div>
           ) : (
-            <Link
-              to="/login"
-              className="inline-flex items-center justify-center rounded-xl bg-[color:var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_16px_40px_rgba(178,75,243,0.28)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_55px_rgba(178,75,243,0.34)]"
-            >
+            <Link to="/login" className="button-primary">
               <span>Login</span>
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>

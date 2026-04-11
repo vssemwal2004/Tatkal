@@ -1,8 +1,9 @@
 const express = require('express');
-const { getFullBackendInfo } = require('../controllers/fullBackendController');
+const { getFullBackendInfo, getFullBackendStatus } = require('../controllers/fullBackendController');
 
 const router = express.Router();
 
 router.get('/full-backend', getFullBackendInfo);
+router.get('/full-backend/status', getFullBackendStatus);
 
 module.exports = router;

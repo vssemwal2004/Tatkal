@@ -57,6 +57,7 @@ app.use('/api', (req, res, next) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/design', verifyToken, designRoutes);
 app.use('/api/client', verifyToken, clientPortalRoutes);
+app.use('/api/client', verifyToken, fullBackendRoutes);
 app.use('/api/admin', verifyToken, requireAdmin, requestRoutes);
 app.use('/api/admin', verifyToken, requireAdmin, deployRoutes);
 app.use('/api/admin', verifyToken, requireAdmin, clientRoutes);
