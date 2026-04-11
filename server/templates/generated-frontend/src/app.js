@@ -165,11 +165,23 @@ function seatLayout(layout) {
   ];
 }
 
+function resolveLabel(value, travelDefault, eventDefault) {
+  if (!isEventMode) {
+    return value || travelDefault;
+  }
+
+  if (!value || value.trim() === '' || value === travelDefault) {
+    return eventDefault;
+  }
+
+  return value;
+}
+
 function getLabels() {
   return {
-    fromLabel: config.dashboard?.fromLabel || (isEventMode ? 'City' : 'From'),
-    toLabel: config.dashboard?.toLabel || (isEventMode ? 'Venue' : 'To'),
-    searchButton: config.dashboard?.buttonLabel || (isEventMode ? 'Search events' : 'Search routes'),
+    fromLabel: resolveLabel(config.dashboard?.fromLabel, 'From', 'City'),
+    toLabel: resolveLabel(config.dashboard?.toLabel, 'To', 'Venue'),
+    searchButton: resolveLabel(config.dashboard?.buttonLabel, 'Search routes', 'Search events'),
     dashboardHelper: isEventMode ? 'Search events and continue to ticket selection.' : 'Search routes and continue to seat selection.',
     resultsEyebrow: isEventMode ? 'Matching Events' : 'Matching Routes',
     resultsHelper: isEventMode ? 'Choose one event to continue.' : 'Choose one route to continue.',

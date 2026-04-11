@@ -1,6 +1,6 @@
 const createProjectId = () => `client_${Date.now()}`;
 
-const defaultRoutes = [
+export const defaultTravelRoutes = [
   {
     id: 'route-1',
     from: 'Ahmedabad',
@@ -35,6 +35,70 @@ const defaultRoutes = [
     seatsLeft: 11
   }
 ];
+
+export const defaultEventRoutes = [
+  {
+    id: 'event-1',
+    from: 'Mumbai',
+    to: 'Stadium Night',
+    operator: 'Tatkal Live',
+    departure: '18:30',
+    arrival: '23:00',
+    duration: '4h 30m',
+    price: 1490,
+    seatsLeft: 180
+  },
+  {
+    id: 'event-2',
+    from: 'Pune',
+    to: 'Indie Fest',
+    operator: 'Sunset Collective',
+    departure: '16:00',
+    arrival: '21:45',
+    duration: '5h 45m',
+    price: 990,
+    seatsLeft: 95
+  },
+  {
+    id: 'event-3',
+    from: 'Delhi',
+    to: 'Art Gala',
+    operator: 'Gallery Circle',
+    departure: '19:00',
+    arrival: '22:15',
+    duration: '3h 15m',
+    price: 1290,
+    seatsLeft: 64
+  }
+];
+
+const normalizeRoute = (route, index, fallback) => ({
+  id: String(route?.id || fallback?.id || `route-${index + 1}`),
+  from: String(route?.from || fallback?.from || ''),
+  to: String(route?.to || fallback?.to || ''),
+  operator: String(route?.operator || fallback?.operator || ''),
+  departure: String(route?.departure || fallback?.departure || ''),
+  arrival: String(route?.arrival || fallback?.arrival || ''),
+  duration: String(route?.duration || fallback?.duration || ''),
+  price: Number(route?.price || 0) || 0,
+  seatsLeft: Number(route?.seatsLeft || 0) || 0
+});
+
+export const isMatchingRoutes = (routes, defaults) => {
+  if (!Array.isArray(routes) || !Array.isArray(defaults)) {
+    return false;
+  }
+
+  if (routes.length !== defaults.length) {
+    return false;
+  }
+
+  return routes.every((route, index) => {
+    const normalized = normalizeRoute(route, index, defaults[index]);
+    const baseline = normalizeRoute(defaults[index], index, defaults[index]);
+    return Object.keys(baseline).every((key) => normalized[key] === baseline[key]);
+  });
+};
 
 export const createDefaultBuilderState = () => ({
   project: {
@@ -97,7 +161,7 @@ export const createDefaultBuilderState = () => ({
     textColor: '#1e293b',
     headerColor: '#2563eb'
   },
-  routes: defaultRoutes
+  routes: defaultTravelRoutes
 });
 
 export const mergeBuilderState = (source) => {

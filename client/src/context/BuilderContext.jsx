@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
-import { mergeBuilderState } from '../data/defaultConfig';
+import { defaultEventRoutes, defaultTravelRoutes, isMatchingRoutes, mergeBuilderState } from '../data/defaultConfig';
 import { useAuth } from './AuthContext';
 import { loadLocalProject, rememberTrackingId, saveLocalProject } from '../services/builderStorage';
 import { fetchDesign, saveDesign } from '../services/designService';
@@ -41,6 +41,37 @@ export const BuilderProvider = ({ children }) => {
       }
     });
   }, [client]);
+
+  useEffect(() => {
+    if (!hydrated) {
+      return;
+    }
+
+    const currentType = builderState.project.businessType;
+
+    if (currentType) {
+      setBuilderState((current) => {
+        let nextRoutes = current.routes;
+
+        if (currentType === 'event' && isMatchingRoutes(current.routes, defaultTravelRoutes)) {
+          nextRoutes = defaultEventRoutes;
+        }
+
+        if (currentType === 'travel' && isMatchingRoutes(current.routes, defaultEventRoutes)) {
+          nextRoutes = defaultTravelRoutes;
+        }
+
+        if (nextRoutes === current.routes) {
+          return current;
+        }
+
+        return {
+          ...current,
+          routes: nextRoutes
+        };
+      });
+    }
+  }, [builderState.project.businessType, hydrated]);
 
   useEffect(() => {
     let active = true;
