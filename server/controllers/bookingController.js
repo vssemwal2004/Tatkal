@@ -1,4 +1,5 @@
 const Booking = require('../models/Booking');
+const Route = require('../models/Route');
 const SeatLock = require('../models/SeatLock');
 const Payment = require('../models/Payment');
 const { ensureClientAccess, ensureClientActive } = require('../utils/clientAccess');
@@ -167,6 +168,7 @@ const confirmBooking = async (req, res, next) => {
       throw error;
     }
 
+    const route = await Route.findOne({ _id: confirmedLock.routeId, clientId: confirmedLock.clientId }).lean();
     const response = {
       message: 'Booking confirmed',
       bookingId: booking._id
@@ -174,11 +176,20 @@ const confirmBooking = async (req, res, next) => {
 
     try {
       const recipient = req.user?.email;
+      const routeLabel = route ? `${route.from} → ${route.to}` : `${confirmedLock.routeId}`;
       await sendBookingConfirmation({
         to: recipient,
         booking,
-        routeLabel: `${confirmedLock.routeId}`,
-        seatLabel: confirmedLock.seatId
+        routeLabel,
+        seatLabel: confirmedLock.seatId,
+        busName: route?.operator || 'Tatkal Express',
+        busNumber: route ? String(route._id).slice(-6) : null,
+        busType: 'AC',
+        journeyDate: booking.createdAt,
+        departureTime: route?.departureTime,
+        arrivalTime: route?.arrivalTime,
+        amount: booking.amount,
+        paymentId: booking.payment?.paymentId || booking.payment?.orderId || null
       });
     } catch (mailError) {
       console.error('Booking confirmation email failed:', mailError?.message || mailError);

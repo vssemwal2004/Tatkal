@@ -315,7 +315,15 @@ const confirmBooking = async (req, res, next) => {
         to: recipient,
         booking,
         routeLabel,
-        seatLabel: confirmedLock.seatId
+        seatLabel: confirmedLock.seatId,
+        busName: route?.operator || 'Tatkal Express',
+        busNumber: route ? String(route._id).slice(-6) : null,
+        busType: 'AC',
+        journeyDate: booking.createdAt,
+        departureTime: route?.departureTime,
+        arrivalTime: route?.arrivalTime,
+        amount: booking.amount,
+        paymentId: booking.payment?.paymentId || booking.payment?.orderId || null
       });
     } catch (mailError) {
       console.error('Booking confirmation email failed:', mailError?.message || mailError);
