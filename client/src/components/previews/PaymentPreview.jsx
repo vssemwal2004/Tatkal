@@ -17,14 +17,14 @@ const PaymentPreview = ({ config, project }) => {
 
   return (
     <PreviewFrame title="Payment Page Preview">
-      <div className="mx-auto grid max-w-5xl gap-5 lg:grid-cols-[1fr_0.9fr]">
-        <div className="rounded-[30px] border border-slate-200 p-6 shadow-[0_16px_36px_rgba(15,23,42,0.06)]" style={{ backgroundColor: config.surfaceColor, color: config.textColor }}>
+      <div className="mx-auto grid max-w-4xl gap-4 lg:grid-cols-[1fr_0.9fr]">
+        <div className="rounded-[30px] border border-slate-200 p-4 shadow-[0_16px_36px_rgba(15,23,42,0.06)]" style={{ backgroundColor: config.surfaceColor, color: config.textColor }}>
           <p className="text-xs uppercase tracking-[0.24em] text-slate-500">Secure checkout</p>
-          <h3 className="mt-2 text-3xl font-bold">{isEvent ? 'Confirm your tickets' : 'Confirm your booking'}</h3>
-          <div className="mt-6 space-y-4">
+          <h3 className="mt-2 text-2xl font-bold">{isEvent ? 'Confirm your tickets' : 'Confirm your booking'}</h3>
+          <div className="mt-4 space-y-3">
             {paymentOptions.map((option, index) => (
               <div
-                className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-4"
+                className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-3"
                 key={option.id}
                 style={{
                   backgroundColor: index === 0 ? `${config.accentColor}18` : '#f8fafc'
@@ -37,18 +37,18 @@ const PaymentPreview = ({ config, project }) => {
           </div>
         </div>
 
-        <div className="rounded-[30px] border border-slate-200 bg-white p-6 text-slate-950 shadow-[0_16px_36px_rgba(15,23,42,0.06)]">
+        <div className="rounded-[30px] border border-slate-200 bg-white p-4 text-slate-950 shadow-[0_16px_36px_rgba(15,23,42,0.06)]">
           <p className="text-xs uppercase tracking-[0.24em] text-slate-500">{isEvent ? 'Ticket summary' : 'Fare summary'}</p>
-          <div className="mt-6 space-y-4">
+          <div className="mt-4 space-y-3">
             <SummaryRow label={isEvent ? 'Ticket price' : 'Base fare'} value="Rs 1,240" />
             <SummaryRow label="Taxes" value="Rs 110" />
             <SummaryRow label="Service fee" value="Rs 40" />
           </div>
-          <div className="mt-6 border-t border-slate-200 pt-5">
+          <div className="mt-4 border-t border-slate-200 pt-4">
             <SummaryRow label="Total" value="Rs 1,390" />
           </div>
           <button
-            className="mt-8 w-full px-4 py-4 text-sm font-semibold text-white"
+            className="mt-6 w-full px-4 py-3 text-sm font-semibold text-white"
             style={{
               backgroundColor: config.accentColor,
               borderRadius: buttonRadius[config.buttonStyle] || buttonRadius.rounded

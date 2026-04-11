@@ -35,7 +35,7 @@ const DashboardPreview = ({ config, project, routes = [] }) => {
           className="overflow-hidden rounded-[30px] border border-slate-200 transition-all duration-300 shadow-[0_18px_40px_rgba(15,23,42,0.08)]"
           style={{
             width: `${config.width}%`,
-            minHeight: `${config.height * 5.6}px`,
+            minHeight: `${config.height * 4.6}px`,
             backgroundImage: config.backgroundImage
               ? `linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.92)), url(${config.backgroundImage})`
               : 'linear-gradient(135deg, rgba(219, 234, 254, 0.95), rgba(255, 255, 255, 0.92))',
@@ -43,11 +43,11 @@ const DashboardPreview = ({ config, project, routes = [] }) => {
             backgroundPosition: 'center'
           }}
         >
-          <div className="p-6" style={{ color: config.textColor }}>
-            <div className="mb-8 flex items-center justify-between">
+          <div className="p-4" style={{ color: config.textColor }}>
+            <div className="mb-6 flex items-center justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.24em] text-slate-500">{project.businessType} booking</p>
-                <h3 className="mt-2 text-3xl font-bold">{project.projectName || 'Atlas Connect'} Dashboard</h3>
+                <h3 className="mt-2 text-2xl font-bold">{project.projectName || 'Atlas Connect'} Dashboard</h3>
               </div>
               <div className="rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-sm text-slate-600">
                 Personalized booking workspace

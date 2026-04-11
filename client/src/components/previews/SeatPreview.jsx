@@ -25,7 +25,7 @@ const TravelPreview = ({ config }) => {
   const seatRows = buildSeatRows(config.layout);
 
   return (
-    <div className="mx-auto max-w-3xl rounded-[30px] border border-slate-200 bg-white p-6 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
+    <div className="mx-auto max-w-3xl rounded-[30px] border border-slate-200 bg-white p-4 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
       <div className="mb-5 flex items-center justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.24em] text-slate-500">Bus layout</p>
@@ -38,7 +38,7 @@ const TravelPreview = ({ config }) => {
         <Legend color={config.selectedColor} label="Selected" />
         <Legend color={config.bookedColor} label="Booked" />
       </div>
-      <div className="space-y-3 rounded-[26px] border border-slate-200 bg-slate-50 p-5">
+      <div className="space-y-3 rounded-[26px] border border-slate-200 bg-slate-50 p-4">
         {seatRows.map((row, rowIndex) => (
           <div className="grid gap-3" key={`row-${rowIndex}`} style={{ gridTemplateColumns: `repeat(${row.length}, minmax(0, 1fr))` }}>
             {row.map((seat, seatIndex) =>
@@ -73,7 +73,7 @@ const EventPreview = ({ config }) => (
       { name: 'Standard Bay', color: config.bookedColor, note: 'Mostly reserved already' }
     ].map((zone) => (
       <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_16px_36px_rgba(15,23,42,0.06)]" key={zone.name}>
-        <div className="mb-5 h-36 rounded-[24px]" style={{ backgroundColor: zone.color }} />
+        <div className="mb-5 h-28 rounded-[24px]" style={{ backgroundColor: zone.color }} />
         <p className="text-xs uppercase tracking-[0.24em] text-slate-500">{zone.note}</p>
         <h3 className="mt-2 text-2xl font-bold text-slate-950">{zone.name}</h3>
         <p className="mt-3 text-sm text-slate-600">Uses the same config-driven seat state palette as the travel builder.</p>
@@ -83,7 +83,7 @@ const EventPreview = ({ config }) => (
 );
 
 const Seat = ({ color, label }) => (
-  <div className="flex h-16 items-center justify-center rounded-2xl border border-white/70 text-sm font-semibold text-slate-950" style={{ backgroundColor: color }}>
+  <div className="flex h-12 items-center justify-center rounded-2xl border border-white/70 text-sm font-semibold text-slate-950" style={{ backgroundColor: color }}>
     {label}
   </div>
 );

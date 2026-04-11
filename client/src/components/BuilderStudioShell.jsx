@@ -1,8 +1,30 @@
-import { ArrowLeft, ArrowRight, CheckCircle2, Eye, LayoutTemplate, SendHorizonal, Sparkles } from 'lucide-react';
+import {
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle2,
+  Eye,
+  LayoutDashboard,
+  LayoutTemplate,
+  LogIn,
+  PanelLeftOpen,
+  ReceiptText,
+  SendHorizonal,
+  Sparkles,
+  Ticket
+} from 'lucide-react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { useBuilder } from '../context/BuilderContext';
 import { builderSteps } from '../data/builderSteps';
+
+const stepIcons = {
+  login: LogIn,
+  dashboard: LayoutDashboard,
+  seats: Ticket,
+  payment: ReceiptText,
+  history: LayoutTemplate
+};
 
 const formatSaveLabel = (saveState, lastSavedAt) => {
   if (saveState === 'saving') {
@@ -14,7 +36,7 @@ const formatSaveLabel = (saveState, lastSavedAt) => {
   }
 
   if (saveState === 'error') {
-    return 'Autosave needs attention';
+    return 'Needs attention';
   }
 
   return 'Autosave ready';
@@ -22,6 +44,7 @@ const formatSaveLabel = (saveState, lastSavedAt) => {
 
 const BuilderStudioShell = ({ step }) => {
   const navigate = useNavigate();
+  const [stepNavExpanded, setStepNavExpanded] = useState(false);
   const {
     builderState,
     hydrated,
@@ -51,178 +74,223 @@ const BuilderStudioShell = ({ step }) => {
 
   return (
     <main className="client-shell">
-      <section className="client-card client-surface overflow-hidden p-5 sm:p-6">
-        <div className="flex flex-col gap-6">
-          <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-            <div>
-              <div className="dashboard-pill inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.24em]">
-                <Sparkles className="h-3.5 w-3.5" />
-                Builder Studio
-              </div>
-              <h1 className="mt-4 text-[1.9rem] font-semibold tracking-[-0.04em] text-slate-950 sm:text-[2.6rem]">
-                {builderState.project.projectName || 'Untitled Platform'}
-              </h1>
-              <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--color-muted)]">
-                Build each screen as a focused product step, keep the customer journey structured, and create a much
-                cleaner export experience for the final handoff.
-              </p>
+      <section className="mb-5 rounded-[28px] border border-[rgba(13,67,97,0.08)] bg-white/75 px-5 py-4 shadow-[0_16px_36px_rgba(13,67,97,0.06)] backdrop-blur-sm sm:px-6">
+        <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+          <div>
+            <div className="dashboard-pill inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.24em]">
+              <Sparkles className="h-3.5 w-3.5" />
+              Customize Frontend + Backend
             </div>
-
-            <div className="grid gap-3 sm:grid-cols-3">
-              <StudioStat
-                icon={LayoutTemplate}
-                label="Business Type"
-                value={builderState.project.businessType === 'event' ? 'Event' : 'Travel'}
-              />
-              <StudioStat icon={CheckCircle2} label="Draft Status" value={formatSaveLabel(saveState, lastSavedAt)} />
-              <StudioStat icon={Eye} label="Builder Ready" value={hydrated ? 'Synced' : 'Loading'} />
-            </div>
+            <h1 className="mt-4 text-[1.65rem] font-semibold tracking-[-0.04em] text-slate-950 sm:text-[2rem]">
+              {builderState.project.projectName || 'Untitled Platform'}
+            </h1>
+            <p className="mt-2 max-w-3xl text-sm leading-7 text-[var(--color-muted)]">
+              A focused builder interface where every change on the left reflects instantly inside the product preview on
+              the right.
+            </p>
           </div>
 
-          <div className="rounded-[30px] border border-[rgba(13,67,97,0.08)] bg-white/80 p-4">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="client-section-title">Page Navigator</p>
-                <h2 className="mt-2 text-lg font-semibold text-slate-950">Move through the journey without scattered tabs</h2>
-              </div>
-              <div className="hidden rounded-full bg-[rgba(178,75,243,0.06)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-[var(--color-secondary)] lg:block">
-                {activeIndex + 1} of {builderSteps.length}
-              </div>
-            </div>
-
-            <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-              {builderSteps.map((item, index) => {
-                const isActive = item.id === step.id;
-                const isCompleted = index < activeIndex;
-
-                return (
-                  <Link
-                    key={item.id}
-                    to={`/client/builder/${item.route}`}
-                    className={`rounded-[24px] border p-4 text-left transition ${
-                      isActive
-                        ? 'dashboard-tab-active'
-                        : 'border-[rgba(13,67,97,0.08)] bg-white hover:border-[rgba(178,75,243,0.18)] hover:bg-[rgba(178,75,243,0.04)]'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <span
-                        className={`inline-flex h-9 w-9 items-center justify-center rounded-[14px] text-sm font-semibold ${
-                          isActive
-                            ? 'bg-white text-[var(--color-primary)]'
-                            : isCompleted
-                              ? 'bg-[rgba(178,75,243,0.1)] text-[var(--color-primary)]'
-                              : 'bg-[rgba(13,67,97,0.06)] text-[var(--color-secondary)]'
-                        }`}
-                      >
-                        {index + 1}
-                      </span>
-                      {isCompleted ? (
-                        <span className="rounded-full bg-[rgba(178,75,243,0.08)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--color-primary)]">
-                          Done
-                        </span>
-                      ) : null}
-                    </div>
-
-                    <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.24em] text-[var(--color-muted)]">
-                      Stage {index + 1}
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-slate-950">{item.short}</p>
-                    <p className="mt-2 text-xs leading-6 text-[var(--color-muted)]">{item.summary}</p>
-                  </Link>
-                );
-              })}
-            </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <StudioStat label="Business type" value={builderState.project.businessType === 'event' ? 'Event' : 'Travel'} />
+            <StudioStat label="Draft status" value={formatSaveLabel(saveState, lastSavedAt)} />
+            <StudioStat label="Preview" value={hydrated ? 'Live sync' : 'Loading'} />
           </div>
         </div>
       </section>
 
-      <section className="mt-6 grid gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
-        <aside className="xl:sticky xl:top-24">
-          <div className="space-y-4 xl:max-h-[calc(100vh-7rem)] xl:overflow-y-auto xl:pr-1">
-            <div className="client-card p-4">
-              <div className="flex items-center gap-2">
-                <LayoutTemplate className="h-4 w-4 text-[var(--color-primary)]" />
-                <p className="client-section-title">Current Page</p>
+      <section
+        className={`grid gap-5 transition-[grid-template-columns] duration-300 ease-in-out ${
+          stepNavExpanded ? 'xl:grid-cols-[232px_360px_minmax(0,1fr)]' : 'xl:grid-cols-[92px_360px_minmax(0,1fr)]'
+        }`}
+      >
+        <aside className="hidden xl:block" onMouseEnter={() => setStepNavExpanded(true)} onMouseLeave={() => setStepNavExpanded(false)}>
+          <div className="sticky top-24 h-[calc(100vh-8rem)] w-full overflow-hidden rounded-[28px] border border-[rgba(13,67,97,0.08)] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(246,250,255,0.96))] shadow-[0_18px_40px_rgba(13,67,97,0.08)] transition-[width] duration-300 ease-in-out">
+            <div className="flex h-full flex-col px-3 py-4">
+              <div className={`mb-5 flex items-center ${stepNavExpanded ? 'justify-start' : 'justify-center'}`}>
+                <div className="flex h-10 w-10 items-center justify-center rounded-[15px] bg-[linear-gradient(135deg,var(--color-primary),var(--color-secondary))] text-white shadow-[0_12px_26px_rgba(178,75,243,0.2)]">
+                  <PanelLeftOpen className="h-4 w-4" />
+                </div>
+                <div
+                  className={`ml-3 min-w-0 overflow-hidden transition-[max-width,opacity,transform] duration-300 ease-in-out ${
+                    stepNavExpanded ? 'max-w-[160px] translate-x-0 opacity-100' : 'max-w-0 -translate-x-1 opacity-0'
+                  }`}
+                >
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--color-muted)]">Builder</p>
+                  <p className="mt-1 text-sm font-semibold text-slate-950">Journey Steps</p>
+                </div>
               </div>
-              <h2 className="mt-2 text-xl font-semibold text-slate-950">{step.label}</h2>
-              <p className="mt-2 text-sm leading-7 text-[var(--color-muted)]">{step.summary}</p>
-            </div>
 
-            <CurrentBuilder
-              businessType={builderState.project.businessType}
-              config={builderState[step.id]}
-              project={builderState.project}
-              routes={builderState.routes}
-              updateRoutes={updateRoutes}
-              updateSection={(value) => updateSection(step.id, value)}
-            />
+              <div className="mb-4 px-1">
+                <div className="h-1.5 overflow-hidden rounded-full bg-[rgba(13,67,97,0.08)]">
+                  <div
+                    className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-primary),var(--color-secondary))] transition-all duration-300"
+                    style={{ width: `${((activeIndex + 1) / builderSteps.length) * 100}%` }}
+                  />
+                </div>
+              </div>
+
+              <p
+                className={`mb-4 px-1 text-[11px] text-[var(--color-muted)] transition-[max-height,opacity,transform] duration-300 ease-in-out ${
+                  stepNavExpanded ? 'max-h-10 translate-y-0 opacity-100' : 'max-h-0 -translate-y-1 opacity-0'
+                }`}
+              >
+                Step {activeIndex + 1} of {builderSteps.length}
+              </p>
+
+              <nav className="flex-1 space-y-2">
+                {builderSteps.map((item, index) => {
+                  const Icon = stepIcons[item.route] || LayoutTemplate;
+                  const isActive = item.id === step.id;
+                  const isCompleted = index < activeIndex;
+
+                  return (
+                    <Link
+                      key={item.id}
+                      to={`/client/builder/${item.route}`}
+                      className={`relative flex items-center gap-3 rounded-[20px] px-3 py-3 transition-all duration-300 ${
+                        isActive
+                          ? 'bg-[rgba(178,75,243,0.12)] text-[var(--color-primary)] shadow-[inset_0_0_0_1px_rgba(178,75,243,0.18)]'
+                          : 'text-[var(--color-secondary)] hover:bg-[rgba(178,75,243,0.05)]'
+                      }`}
+                    >
+                      <span
+                        className={`absolute left-0 top-2 bottom-2 rounded-full transition-all duration-300 ${
+                          isActive ? 'w-[3px] bg-[var(--color-primary)] opacity-100' : 'w-0 opacity-0'
+                        }`}
+                      />
+                      <div
+                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[15px] ${
+                          isActive
+                            ? 'bg-white shadow-[0_10px_18px_rgba(178,75,243,0.16)]'
+                            : isCompleted
+                              ? 'bg-[rgba(178,75,243,0.1)]'
+                              : 'bg-[rgba(13,67,97,0.06)]'
+                        }`}
+                      >
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      <div
+                        className={`min-w-0 overflow-hidden transition-[max-width,opacity,transform] duration-300 ease-in-out ${
+                          stepNavExpanded ? 'max-w-[140px] translate-x-0 opacity-100' : 'max-w-0 -translate-x-1 opacity-0'
+                        }`}
+                      >
+                        <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-[var(--color-muted)]">
+                          {isCompleted ? 'Completed' : `Step ${index + 1}`}
+                        </p>
+                        <p className="mt-1 truncate text-[13px] font-medium text-slate-950">{item.short}</p>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </nav>
+            </div>
           </div>
         </aside>
 
-        <div className="space-y-4">
-          <CurrentPreview
-            businessType={builderState.project.businessType}
-            config={builderState[step.id]}
-            project={builderState.project}
-            routes={builderState.routes}
-          />
-
-          <div className="client-card p-4">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div>
-                <p className="client-section-title">Workflow</p>
-                <p className="mt-1 text-sm leading-7 text-[var(--color-muted)]">
-                  Keep each page isolated, move through the builder in order, and submit when the full customer flow is
-                  ready for admin conversion.
-                </p>
-                {submitError ? (
-                  <p className="mt-2 rounded-2xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
-                    {submitError}
-                  </p>
-                ) : null}
+        <aside className="order-2 xl:order-none">
+          <div className="sticky top-24 h-[calc(100vh-8rem)] overflow-hidden rounded-[28px] border border-[rgba(13,67,97,0.08)] bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,251,255,0.96))] shadow-[0_20px_42px_rgba(13,67,97,0.08)]">
+            <div className="flex h-full flex-col">
+              <div className="border-b border-[rgba(13,67,97,0.08)] px-5 py-4">
+                <p className="client-section-title">Configuration Panel</p>
+                <div className="mt-2 flex items-start justify-between gap-3">
+                  <div>
+                    <h2 className="text-[15px] font-semibold text-slate-950">{step.label}</h2>
+                    <p className="mt-1 text-[11px] leading-5 text-[var(--color-muted)]">{step.summary}</p>
+                  </div>
+                  <div className="rounded-full bg-[rgba(178,75,243,0.08)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--color-primary)]">
+                    Live edit
+                  </div>
+                </div>
               </div>
 
-              <div className="flex flex-wrap gap-2">
-                {previousStep ? (
-                  <Link className="button-secondary" to={`/client/builder/${previousStep.route}`}>
-                    <ArrowLeft className="mr-1 h-4 w-4" />
-                    Previous
-                  </Link>
-                ) : (
-                  <Link className="button-secondary" to="/client/workspace">
-                    <ArrowLeft className="mr-1 h-4 w-4" />
-                    Workspace
-                  </Link>
-                )}
-
-                {nextStep ? (
-                  <Link className="button-secondary" to={`/client/builder/${nextStep.route}`}>
-                    Next
-                    <ArrowRight className="ml-1 h-4 w-4" />
-                  </Link>
-                ) : null}
-
-                <button className="button-primary" onClick={handleSubmit} type="button">
-                  <SendHorizonal className="mr-2 h-4 w-4" />
-                  {submitState === 'submitting' ? 'Submitting...' : 'Submit Design'}
-                </button>
+              <div className="builder-config-scroll flex-1 overflow-y-auto px-4 py-4">
+                <CurrentBuilder
+                  businessType={builderState.project.businessType}
+                  config={builderState[step.id]}
+                  project={builderState.project}
+                  routes={builderState.routes}
+                  updateRoutes={updateRoutes}
+                  updateSection={(value) => updateSection(step.id, value)}
+                />
               </div>
             </div>
           </div>
-        </div>
+        </aside>
+
+        <section className="order-1 xl:order-none">
+          <div className="space-y-4">
+            <div className="rounded-[28px] border border-[rgba(13,67,97,0.08)] bg-white/78 p-4 shadow-[0_18px_40px_rgba(13,67,97,0.08)] backdrop-blur-sm sm:p-5">
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <div>
+                  <p className="client-section-title">Live Preview</p>
+                  <h2 className="mt-2 text-[15px] font-semibold text-slate-950">Real-time screen rendering inside a laptop frame</h2>
+                </div>
+                <div className="inline-flex items-center gap-2 rounded-full bg-[rgba(178,75,243,0.06)] px-3 py-2 text-[11px] font-medium text-[var(--color-secondary)]">
+                  <Eye className="h-4 w-4 text-[var(--color-primary)]" />
+                  Instant updates
+                </div>
+              </div>
+
+              <CurrentPreview
+                businessType={builderState.project.businessType}
+                config={builderState[step.id]}
+                project={builderState.project}
+                routes={builderState.routes}
+              />
+            </div>
+
+            <div className="rounded-[24px] border border-[rgba(13,67,97,0.08)] bg-white p-4 shadow-[0_16px_36px_rgba(13,67,97,0.06)]">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <p className="client-section-title">Workflow Actions</p>
+                  <p className="mt-1 text-sm leading-6 text-[var(--color-muted)]">
+                    Navigate step by step, keep the preview clean, and submit once the full journey is ready.
+                  </p>
+                  {submitError ? (
+                    <p className="mt-2 rounded-2xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+                      {submitError}
+                    </p>
+                  ) : null}
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {previousStep ? (
+                    <Link className="button-secondary" to={`/client/builder/${previousStep.route}`}>
+                      <ArrowLeft className="mr-1 h-4 w-4" />
+                      Previous
+                    </Link>
+                  ) : (
+                    <Link className="button-secondary" to="/client/workspace">
+                      <ArrowLeft className="mr-1 h-4 w-4" />
+                      Workspace
+                    </Link>
+                  )}
+
+                  {nextStep ? (
+                    <Link className="button-secondary" to={`/client/builder/${nextStep.route}`}>
+                      Next
+                      <ArrowRight className="ml-1 h-4 w-4" />
+                    </Link>
+                  ) : null}
+
+                  <button className="button-primary" onClick={handleSubmit} type="button">
+                    <SendHorizonal className="mr-2 h-4 w-4" />
+                    {submitState === 'submitting' ? 'Submitting...' : 'Submit Design'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </section>
     </main>
   );
 };
 
-const StudioStat = ({ icon: Icon, label, value }) => (
-  <div className="rounded-[22px] border border-[rgba(13,67,97,0.08)] bg-white px-4 py-3 shadow-[0_8px_30px_rgba(13,67,97,0.06)]">
-    <div className="flex items-center gap-2 text-[var(--color-muted)]">
-      <Icon className="h-4 w-4 text-[var(--color-primary)]" />
-      <span className="text-[10px] uppercase tracking-[0.22em]">{label}</span>
-    </div>
-    <p className="mt-2 text-sm font-semibold text-slate-950">{value}</p>
+const StudioStat = ({ label, value }) => (
+  <div className="rounded-[20px] border border-[rgba(13,67,97,0.08)] bg-white px-4 py-3 shadow-[0_8px_24px_rgba(13,67,97,0.05)]">
+    <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--color-muted)]">{label}</p>
+    <p className="mt-1.5 text-sm font-semibold text-slate-950">{value}</p>
   </div>
 );
 
