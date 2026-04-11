@@ -1,4 +1,3 @@
-import { ShieldCheck, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 
@@ -29,92 +28,88 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mx-auto grid min-h-[calc(100vh-3rem)] max-w-6xl overflow-hidden rounded-[34px] border border-slate-200 bg-white/92 shadow-[0_30px_100px_rgba(15,23,42,0.08)] backdrop-blur-xl lg:grid-cols-[1.02fr_0.98fr]">
-        <section className="relative hidden border-r border-slate-200 p-8 lg:block">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.12),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(249,115,22,0.14),transparent_30%)]" />
-          <div className="relative">
-            <span className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-medium uppercase tracking-[0.22em] text-brand-700">
-              <ShieldCheck className="h-3.5 w-3.5" />
-              Secure Access
-            </span>
-            <h1 className="mt-5 max-w-md text-4xl font-semibold leading-tight tracking-[-0.04em] text-slate-950">
-              One login for admin operations and the client website workspace.
-            </h1>
-            <p className="mt-5 max-w-lg text-sm leading-8 text-slate-600">
-              Admins open the control panel. Clients move into a lighter, route-based studio where each website page is
-              designed separately and exported more professionally.
-            </p>
+    <div className="min-h-screen px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-6xl items-center justify-center">
+        <div className="relative h-[460px] w-full overflow-hidden rounded-[34px] border border-slate-200 bg-white shadow-[0_30px_100px_rgba(15,23,42,0.08)] sm:h-[520px] lg:h-[560px]">
+          <img
+            src="/login.webp"
+            alt=""
+            className="h-full w-full select-none object-cover object-center"
+            draggable="false"
+          />
 
-            <div className="mt-10 space-y-3">
-              <PromoCard title="Client Dashboard" text="Structured page editing, autosave, live preview, and tracking." />
-              <PromoCard title="Admin Console" text="Requests, approvals, clients, deployments, and export controls." />
-              <PromoCard title="Shared Auth" text="JWT-based access for both roles with one login endpoint." />
+          <div className="absolute inset-0">
+            <div className="flex h-full w-full items-center">
+              <div className="w-full max-w-sm px-6 py-8 sm:px-10 sm:py-10">
+                <img
+                  src="/logo.png"
+                  alt="Tatkal"
+                  className="h-14 w-auto select-none"
+                  draggable="false"
+                />
+
+                <div className="mt-6">
+                  <h1 className="text-3xl font-semibold tracking-[-0.04em] text-slate-950 sm:text-[2.15rem]">
+                    Sign in
+                  </h1>
+                  <p className="mt-2 text-sm leading-7 text-slate-700/80">
+                    Continue to your workspace with your email and password.
+                  </p>
+                </div>
+
+                <form className="mt-7 space-y-4" onSubmit={handleSubmit}>
+                  <label className="block space-y-1.5">
+                    <span className="text-xs font-medium uppercase tracking-[0.18em] text-slate-700/70">Email</span>
+                    <input
+                      className="field-base"
+                      placeholder="you@company.com"
+                      type="email"
+                      value={form.email}
+                      onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
+                      required
+                    />
+                  </label>
+
+                  <label className="block space-y-1.5">
+                    <span className="text-xs font-medium uppercase tracking-[0.18em] text-slate-700/70">Password</span>
+                    <input
+                      className="field-base"
+                      placeholder="Enter your password"
+                      type="password"
+                      value={form.password}
+                      onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
+                      required
+                    />
+                  </label>
+
+                  {error ? (
+                    <p className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+                      {error}
+                    </p>
+                  ) : null}
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="inline-flex w-full items-center justify-center rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_rgba(178,75,243,0.28)] ring-1 ring-white/20 transition will-change-transform hover:-translate-y-0.5 hover:bg-accent/95 hover:shadow-[0_22px_55px_rgba(178,75,243,0.34)] focus:outline-none focus:ring-4 focus:ring-accent/20 active:translate-y-0 active:shadow-[0_10px_22px_rgba(15,23,42,0.14)] disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {loading ? 'Signing in...' : 'Login'}
+                  </button>
+                </form>
+
+                <p className="mt-5 text-sm text-slate-600">
+                  Don&apos;t have an account?{' '}
+                  <Link className="font-semibold text-platform hover:underline" to="/register">
+                    Create Account
+                  </Link>
+                </p>
+              </div>
             </div>
           </div>
-        </section>
-
-        <section className="flex items-center p-6 sm:p-8">
-          <div className="w-full">
-            <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs uppercase tracking-[0.22em] text-slate-500">
-              <Sparkles className="h-3.5 w-3.5 text-brand-500" />
-              Welcome back
-            </span>
-            <h2 className="mt-4 text-3xl font-semibold text-slate-950">Login</h2>
-            <p className="mt-2 text-sm leading-7 text-slate-600">
-              Use your admin or client credentials to continue to the correct workspace.
-            </p>
-
-            <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
-              <label className="block space-y-1.5">
-                <span className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Email</span>
-                <input
-                  className="field-base"
-                  placeholder="admin@tatkal.com or client@example.com"
-                  type="email"
-                  value={form.email}
-                  onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
-                  required
-                />
-              </label>
-
-              <label className="block space-y-1.5">
-                <span className="text-xs font-medium uppercase tracking-[0.18em] text-slate-500">Password</span>
-                <input
-                  className="field-base"
-                  placeholder="Enter your password"
-                  type="password"
-                  value={form.password}
-                  onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
-                  required
-                />
-              </label>
-
-              {error ? <p className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p> : null}
-
-              <button type="submit" disabled={loading} className="button-primary w-full">
-                {loading ? 'Signing in...' : 'Login'}
-              </button>
-            </form>
-
-            <p className="mt-5 text-sm text-slate-600">
-              Need a client account?{' '}
-              <Link className="font-semibold text-brand-700" to="/register">
-                Register now
-              </Link>
-            </p>
-          </div>
-        </section>
+        </div>
       </div>
     </div>
   );
 };
-
-const PromoCard = ({ title, text }) => (
-  <div className="rounded-2xl border border-slate-200 bg-white/80 p-4">
-    <p className="text-sm font-semibold text-slate-950">{title}</p>
-    <p className="mt-2 text-sm leading-7 text-slate-600">{text}</p>
-  </div>
-);
 
 export default LoginPage;

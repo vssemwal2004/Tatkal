@@ -4,6 +4,8 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        platform: 'rgb(13 67 97 / <alpha-value>)',
+        accent: 'rgb(178 75 243 / <alpha-value>)',
         aurora: {
           500: 'rgb(239 68 68 / <alpha-value>)',
           400: 'rgb(251 113 133 / <alpha-value>)',
