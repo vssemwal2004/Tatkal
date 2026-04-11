@@ -15,6 +15,7 @@ const deployRoutes = require('./routes/deployRoutes');
 const clientRoutes = require('./routes/clientRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
+const fullBackendRoutes = require('./routes/fullBackendRoutes');
 const { handleWebhook } = require('./controllers/paymentController');
 const ensureAdminUser = require('./utils/seedAdmin');
 
@@ -59,6 +60,7 @@ app.use('/api/client', verifyToken, clientPortalRoutes);
 app.use('/api/admin', verifyToken, requireAdmin, requestRoutes);
 app.use('/api/admin', verifyToken, requireAdmin, deployRoutes);
 app.use('/api/admin', verifyToken, requireAdmin, clientRoutes);
+app.use('/api/admin', verifyToken, requireAdmin, fullBackendRoutes);
 app.use('/api/booking', verifyToken, bookingRoutes);
 app.use('/api/payment', verifyToken, paymentRoutes);
 

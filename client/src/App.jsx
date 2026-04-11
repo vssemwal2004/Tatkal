@@ -12,6 +12,7 @@ import ClientHistoryDesignPage from './pages/ClientHistoryDesignPage';
 import ClientLoginDesignPage from './pages/ClientLoginDesignPage';
 import ClientPaymentDesignPage from './pages/ClientPaymentDesignPage';
 import ClientSeatDesignPage from './pages/ClientSeatDesignPage';
+import FullBackendPage from './pages/FullBackendPage';
 import ClientWorkspacePage from './pages/ClientWorkspacePage';
 import ClientsPage from './pages/ClientsPage';
 import DashboardPage from './pages/DashboardPage';
@@ -54,6 +55,7 @@ const App = () => (
       <Route path="/client" element={<Navigate to="/client/dashboard" replace />} />
       <Route path="/client/dashboard" element={<ClientDashboardPage />} />
       <Route path="/client/workspace" element={<ClientWorkspacePage />} />
+      <Route path="/client/full-backend" element={<FullBackendPage />} />
       <Route path="/client/builder-entry" element={<BuilderEntryPage />} />
       <Route path="/client/business-type" element={<BusinessTypePage />} />
       <Route path="/client/builder" element={<BuilderPage />} />

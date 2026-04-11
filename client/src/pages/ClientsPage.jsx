@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import ClientCard from '../components/ClientCard';
 import EmptyState from '../components/EmptyState';
 import PageHeader from '../components/PageHeader';
-import { deleteClient, fetchClients, updateClientStatus } from '../services/clientService';
+import { deleteClient, fetchClients, updateClientStatus, updateFullBackendAccess } from '../services/clientService';
 
 const ClientsPage = () => {
   const [clients, setClients] = useState([]);
@@ -73,6 +73,29 @@ const ClientsPage = () => {
     }
   };
 
+  const onToggleFullBackend = async (client) => {
+    const nextValue = !client.fullBackendEnabled;
+    const confirmed = window.confirm(
+      `${nextValue ? 'Enable' : 'Disable'} full backend for "${client.name}" (${client.clientId})?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setProcessingId(client.clientId);
+    setError('');
+
+    try {
+      await updateFullBackendAccess(client.clientId, nextValue);
+      await loadClients();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Unable to update full backend access.');
+    } finally {
+      setProcessingId('');
+    }
+  };
+
   const filteredClients = clients.filter((client) => {
     const text = `${client.name} ${client.clientId} ${client.businessType} ${client.status}`.toLowerCase();
     return text.includes(query.toLowerCase());
@@ -114,6 +137,7 @@ const ClientsPage = () => {
             key={client.clientId}
             client={client}
             onToggleStatus={onToggleStatus}
+            onToggleFullBackend={onToggleFullBackend}
             onDelete={onDelete}
             processing={processingId === client.clientId}
           />

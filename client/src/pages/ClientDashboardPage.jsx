@@ -18,8 +18,9 @@ const solutionCards = [
     title: 'Full Backend',
     description:
       'A backend-focused setup flow for teams who already have a frontend and only need APIs, data models, and logic.',
-    highlight: 'Coming Soon',
-    status: 'soon',
+    highlight: 'Available now',
+    status: 'ready',
+    to: '/client/full-backend',
     icon: Layers3
   },
   {
@@ -52,15 +53,14 @@ const ClientDashboardPage = () => {
               </h1>
               <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
                 We added a cleaner client-side page after login so users can clearly choose the workflow they need.
-                The complete frontend and backend journey is ready now, and the backend-only paths are marked as
-                coming soon.
+                The complete frontend + backend journey and the full backend flow are ready to use right now.
               </p>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
               <SummaryCard label="Client" value={client?.name || 'Workspace User'} />
-              <SummaryCard label="Live Option" value="1 available flow" />
-              <SummaryCard label="Roadmap" value="2 modes coming soon" />
+              <SummaryCard label="Live Option" value="2 available flows" />
+              <SummaryCard label="Roadmap" value="Customize backend next" />
             </div>
           </div>
         </section>

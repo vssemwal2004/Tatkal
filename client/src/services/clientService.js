@@ -14,3 +14,8 @@ export const deleteClient = async (clientId) => {
   const { data } = await api.delete(`/admin/clients/${clientId}`);
   return data;
 };
+
+export const updateFullBackendAccess = async (clientId, fullBackendEnabled) => {
+  const { data } = await api.patch(`/admin/clients/${clientId}/full-backend`, { fullBackendEnabled });
+  return data;
+};

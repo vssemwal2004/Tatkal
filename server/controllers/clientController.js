@@ -21,6 +21,7 @@ const listClients = async (req, res, next) => {
     const payload = clients.map((client) => ({
       ...client,
       isActive: client.isActive !== false,
+      fullBackendEnabled: client.fullBackendEnabled !== false,
       status: latestByClient[client.clientId]?.status || 'pending',
       lastRequestAt: latestByClient[client.clientId]?.createdAt || null,
       deployedAt: latestByClient[client.clientId]?.deployment?.deployedAt || null,
@@ -28,6 +29,37 @@ const listClients = async (req, res, next) => {
     }));
 
     return res.status(200).json(payload);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+const updateFullBackendAccess = async (req, res, next) => {
+  try {
+    const { clientId } = req.params;
+    const { fullBackendEnabled } = req.body;
+
+    if (typeof fullBackendEnabled !== 'boolean') {
+      return res.status(400).json({ message: 'fullBackendEnabled (boolean) is required' });
+    }
+
+    const client = await Client.findOne({ clientId });
+
+    if (!client) {
+      return res.status(404).json({ message: 'Client not found' });
+    }
+
+    client.fullBackendEnabled = fullBackendEnabled;
+    await client.save();
+
+    return res.status(200).json({
+      message: fullBackendEnabled ? 'Full backend access enabled' : 'Full backend access disabled',
+      client: {
+        clientId: client.clientId,
+        name: client.name,
+        fullBackendEnabled: client.fullBackendEnabled
+      }
+    });
   } catch (error) {
     return next(error);
   }
@@ -92,5 +124,6 @@ const deleteClient = async (req, res, next) => {
 module.exports = {
   listClients,
   updateClientStatus,
+  updateFullBackendAccess,
   deleteClient
 };

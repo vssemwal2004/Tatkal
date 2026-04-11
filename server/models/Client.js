@@ -37,6 +37,11 @@ const clientSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
       index: true
+    },
+    fullBackendEnabled: {
+      type: Boolean,
+      default: true,
+      index: true
     }
   },
   {
