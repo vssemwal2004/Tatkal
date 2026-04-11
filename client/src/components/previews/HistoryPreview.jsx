@@ -20,13 +20,13 @@ const HistoryPreview = ({ config, project }) => {
   return (
     <PreviewFrame title="Order History Preview">
       <div
-        className="mx-auto max-w-4xl rounded-[30px] border border-slate-200 p-4 shadow-[0_16px_36px_rgba(15,23,42,0.06)]"
+        className="mx-auto max-w-5xl rounded-[30px] border border-slate-200 p-6 shadow-[0_16px_36px_rgba(15,23,42,0.06)]"
         style={{ backgroundColor: config.surfaceColor, color: config.textColor }}
       >
         <div className="mb-6 flex items-center justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.24em] text-slate-500">Order history</p>
-            <h3 className="mt-2 text-2xl font-bold">{isEvent ? 'Event bookings' : 'Customer bookings'}</h3>
+            <h3 className="mt-2 text-3xl font-bold">{isEvent ? 'Event bookings' : 'Customer bookings'}</h3>
           </div>
           <div
             className="rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em]"
@@ -39,7 +39,7 @@ const HistoryPreview = ({ config, project }) => {
         {config.layout === 'card' ? (
           <div className="grid gap-4 md:grid-cols-3">
             {bookings.map((booking) => (
-              <div className="rounded-[26px] border border-slate-200 bg-slate-50 p-4" key={booking.id}>
+              <div className="rounded-[26px] border border-slate-200 bg-slate-50 p-5" key={booking.id}>
                 <p className="text-xs uppercase tracking-[0.22em] text-slate-500">{booking.id}</p>
                 <h4 className="mt-3 text-xl font-bold">{booking.route}</h4>
                 <p className="mt-2 text-sm text-slate-500">{booking.date}</p>
