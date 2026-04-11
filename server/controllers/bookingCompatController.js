@@ -315,7 +315,15 @@ const confirmBooking = async (req, res, next) => {
         to: recipient,
         booking,
         routeLabel,
-        seatLabel: confirmedLock.seatId
+        seatLabel: confirmedLock.seatId,
+        busName: route?.operator || 'Tatkal Express',
+        busNumber: route ? String(route._id).slice(-6) : null,
+        busType: 'AC',
+        journeyDate: booking.createdAt,
+        departureTime: route?.departureTime,
+        arrivalTime: route?.arrivalTime,
+        amount: booking.amount,
+        paymentId: booking.payment?.paymentId || booking.payment?.orderId || null
       });
     } catch (mailError) {
       console.error('Booking confirmation email failed:', mailError?.message || mailError);
@@ -360,7 +368,44 @@ const releaseSeat = async (req, res, next) => {
 const getMyBookings = async (req, res, next) => {
   try {
     const items = await Booking.find({ userId: req.user.id }).sort({ createdAt: -1 }).lean();
-    return res.status(200).json({ bookings: items });
+    const routeIds = [...new Set(items.map((item) => item.routeId))];
+    const routes = await Route.find({ _id: { $in: routeIds } }).lean();
+    const routeMap = routes.reduce((acc, route) => {
+      acc[String(route._id)] = route;
+      return acc;
+    }, {});
+
+    const bookings = items.map((booking) => {
+      const route = routeMap[booking.routeId];
+      const totalSeats = route?.totalSeats || 40;
+      return {
+        id: booking._id,
+        bookingId: booking._id,
+        seatNumber: booking.seatId,
+        seats: [{ seatNumber: booking.seatId }],
+        amount: booking.amount,
+        totalFare: booking.amount,
+        paymentId: booking.payment?.paymentId || booking.payment?.orderId || null,
+        createdAt: booking.createdAt,
+        journeyDate: booking.createdAt,
+        route: route
+          ? { from: route.from, to: route.to, duration: null }
+          : null,
+        schedule: route
+          ? { departureTime: route.departureTime || '07:00', arrivalTime: route.arrivalTime || '10:00' }
+          : null,
+        bus: route
+          ? {
+              busName: route.operator || 'Tatkal Express',
+              busNumber: String(route._id).slice(-6),
+              busType: 'AC',
+              totalSeats
+            }
+          : null
+      };
+    });
+
+    return res.status(200).json({ bookings });
   } catch (error) {
     return next(error);
   }
@@ -372,7 +417,36 @@ const getBookingById = async (req, res, next) => {
     if (!booking || booking.userId.toString() !== req.user.id) {
       return res.status(404).json({ message: 'Booking not found' });
     }
-    return res.status(200).json(booking);
+    const route = await Route.findOne({ _id: booking.routeId, clientId: booking.clientId }).lean();
+
+    const totalSeats = route?.totalSeats || 40;
+    const response = {
+      id: booking._id,
+      bookingId: booking._id,
+      seatNumber: booking.seatId,
+      seats: [{ seatNumber: booking.seatId }],
+      amount: booking.amount,
+      totalFare: booking.amount,
+      paymentId: booking.payment?.paymentId || booking.payment?.orderId || null,
+      createdAt: booking.createdAt,
+      journeyDate: booking.createdAt,
+      route: route
+        ? { from: route.from, to: route.to, duration: null }
+        : null,
+      schedule: route
+        ? { departureTime: route.departureTime || '07:00', arrivalTime: route.arrivalTime || '10:00' }
+        : null,
+      bus: route
+        ? {
+            busName: route.operator || 'Tatkal Express',
+            busNumber: String(route._id).slice(-6),
+            busType: 'AC',
+            totalSeats
+          }
+        : null
+    };
+
+    return res.status(200).json(response);
   } catch (error) {
     return next(error);
   }
