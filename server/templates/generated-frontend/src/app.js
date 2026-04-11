@@ -9,6 +9,7 @@ const project = generated.project || {};
 const routes = generated.routes || [];
 const clientId = project.clientId || '';
 const backendBaseUrl = String(generated.backendBaseUrl || '').replace(/\/$/, '');
+const isEventMode = String(project.businessType || '').toLowerCase() === 'event';
 
 const state = {
   token: localStorage.getItem(TOKEN_KEY) || '',
@@ -161,6 +162,29 @@ function seatLayout(layout) {
     ['B1', 'B2', null, 'B3'],
     ['C1', 'C2', null, 'C3'],
     ['D1', 'D2', null, 'D3']
+  ];
+}
+
+function getLabels() {
+  return {
+    fromLabel: config.dashboard?.fromLabel || (isEventMode ? 'City' : 'From'),
+    toLabel: config.dashboard?.toLabel || (isEventMode ? 'Venue' : 'To'),
+    searchButton: config.dashboard?.buttonLabel || (isEventMode ? 'Search events' : 'Search routes'),
+    dashboardHelper: isEventMode ? 'Search events and continue to ticket selection.' : 'Search routes and continue to seat selection.',
+    resultsEyebrow: isEventMode ? 'Matching Events' : 'Matching Routes',
+    resultsHelper: isEventMode ? 'Choose one event to continue.' : 'Choose one route to continue.',
+    resultsEmpty: isEventMode ? 'No events matched this search.' : 'No routes matched this search.',
+    selectAction: isEventMode ? 'Select tickets' : 'Select seats',
+    seatLabel: isEventMode ? 'Ticket' : 'Seat',
+    itemLabel: isEventMode ? 'Events' : 'Routes'
+  };
+}
+
+function ticketZones() {
+  return [
+    { id: 'Premium', name: 'Premium Deck', color: 'var(--seat-selected)', note: 'Closest to stage' },
+    { id: 'Gold', name: 'Gold Zone', color: 'var(--seat-available)', note: 'High demand visibility' },
+    { id: 'Standard', name: 'Standard Bay', color: 'var(--seat-booked)', note: 'Limited access view' }
   ];
 }
 
@@ -356,15 +380,16 @@ function renderDashboard() {
 
   const fromOptions = [...new Set(routes.map((route) => route.from).filter(Boolean))];
   const toOptions = [...new Set(routes.map((route) => route.to).filter(Boolean))];
+  const labels = getLabels();
 
   setPage(`
     <section class="hero">
       <div class="eyebrow">Customer Dashboard</div>
       <h1>${project.projectName || 'Booking Dashboard'}</h1>
-      <p class="helper spacer-top">Search routes and continue to seat selection.</p>
+      <p class="helper spacer-top">${labels.dashboardHelper}</p>
       <div class="metric-grid spacer-top">
         <div class="metric-card"><div class="metric-label">Business Type</div><div class="metric-value">${project.businessType || 'travel'}</div></div>
-        <div class="metric-card"><div class="metric-label">Routes</div><div class="metric-value">${routes.length}</div></div>
+        <div class="metric-card"><div class="metric-label">${labels.itemLabel}</div><div class="metric-value">${routes.length}</div></div>
         <div class="metric-card"><div class="metric-label">Signed In</div><div class="metric-value">${state.user?.name || state.user?.email || ''}</div></div>
       </div>
     </section>
@@ -372,14 +397,14 @@ function renderDashboard() {
       <div class="page-grid">
         <form id="search-form" class="feature-list">
           <div class="field-group">
-            <label>${config.dashboard?.fromLabel || 'From'}</label>
+            <label>${labels.fromLabel}</label>
             <select class="select" name="from">${fromOptions.map((item) => `<option value="${item}">${item}</option>`).join('')}</select>
           </div>
           <div class="field-group">
-            <label>${config.dashboard?.toLabel || 'To'}</label>
+            <label>${labels.toLabel}</label>
             <select class="select" name="to">${toOptions.map((item) => `<option value="${item}">${item}</option>`).join('')}</select>
           </div>
-          <button class="button" type="submit">${config.dashboard?.buttonLabel || 'Search routes'}</button>
+          <button class="button" type="submit">${labels.searchButton}</button>
         </form>
       </div>
     </section>
@@ -399,26 +424,30 @@ function renderResults() {
   const from = params.get('from') || '';
   const to = params.get('to') || '';
   const items = routes.filter((route) => (!from || route.from === from) && (!to || route.to === to));
+  const labels = getLabels();
+  const headline = isEventMode
+    ? `${from || 'Any city'} • ${to || 'Any venue'}`
+    : `${from || 'Any origin'} to ${to || 'Any destination'}`;
 
   setPage(`
     <section class="hero">
-      <div class="eyebrow">Matching Routes</div>
-      <h1>${from || 'Any origin'} to ${to || 'Any destination'}</h1>
-      <p class="helper spacer-top">Choose one route to continue.</p>
+      <div class="eyebrow">${labels.resultsEyebrow}</div>
+      <h1>${headline}</h1>
+      <p class="helper spacer-top">${labels.resultsHelper}</p>
     </section>
     <section class="page-card spacer-top">
       <div class="page-grid">
         <div class="result-list">
           ${items.length ? items.map((route) => `
             <article class="result-card">
-              <div class="tag">${route.operator || 'Operator'}</div>
-              <h3>${route.from} to ${route.to}</h3>
+              <div class="tag">${route.operator || (isEventMode ? 'Organizer' : 'Operator')}</div>
+              <h3>${isEventMode ? `${route.from} • ${route.to}` : `${route.from} to ${route.to}`}</h3>
               <div class="meta-row"><span>${route.departure} - ${route.arrival}</span><strong>${money(route.price)}</strong></div>
               <div class="inline-actions spacer-top">
-                <a class="button" href="/seats?routeId=${encodeURIComponent(route.id)}" data-nav>Select seats</a>
+                <a class="button" href="/seats?routeId=${encodeURIComponent(route.id)}" data-nav>${labels.selectAction}</a>
               </div>
             </article>
-          `).join('') : '<div class="empty-state">No routes matched this search.</div>'}
+          `).join('') : `<div class="empty-state">${labels.resultsEmpty}</div>`}
         </div>
       </div>
     </section>
@@ -437,22 +466,38 @@ function renderSeats() {
   }
 
   const rows = seatLayout(config.seatSelection?.layout);
+  const heroTitle = isEventMode ? `${route.from} • ${route.to}` : `${route.from} to ${route.to}`;
 
   setPage(`
     <section class="hero">
-      <div class="eyebrow">Seat Selection</div>
-      <h1>${route.from} to ${route.to}</h1>
-      <p class="helper spacer-top">Pick a seat and lock it through your backend.</p>
+      <div class="eyebrow">${isEventMode ? 'Ticket Selection' : 'Seat Selection'}</div>
+      <h1>${heroTitle}</h1>
+      <p class="helper spacer-top">${isEventMode ? 'Pick a ticket zone and lock it through your backend.' : 'Pick a seat and lock it through your backend.'}</p>
     </section>
     <section class="page-card spacer-top">
       <div class="page-grid">
-        <div class="seat-grid">
-          ${rows.map((row) => `
-            <div class="seat-row" style="grid-template-columns: repeat(${row.length}, minmax(0, 1fr));">
-              ${row.map((seatId) => seatId ? `<button class="seat available" type="button" data-seat="${seatId}">${seatId}</button>` : '<div class="seat-gap"></div>').join('')}
-            </div>
-          `).join('')}
-        </div>
+        ${isEventMode ? `
+          <div class="ticket-grid">
+            ${ticketZones().map((zone) => `
+              <button class="ticket-card" type="button" data-seat="${zone.id}">
+                <span class="ticket-swatch" style="background:${zone.color};"></span>
+                <div class="ticket-body">
+                  <p class="ticket-eyebrow">${zone.note}</p>
+                  <h3>${zone.name}</h3>
+                </div>
+                <div class="ticket-price">${money(route.price)}</div>
+              </button>
+            `).join('')}
+          </div>
+        ` : `
+          <div class="seat-grid">
+            ${rows.map((row) => `
+              <div class="seat-row" style="grid-template-columns: repeat(${row.length}, minmax(0, 1fr));">
+                ${row.map((seatId) => seatId ? `<button class="seat available" type="button" data-seat="${seatId}">${seatId}</button>` : '<div class="seat-gap"></div>').join('')}
+              </div>
+            `).join('')}
+          </div>
+        `}
         <div id="seat-error"></div>
       </div>
     </section>
@@ -496,6 +541,10 @@ function renderPayment() {
     return;
   }
 
+  const labels = getLabels();
+  const routeLabel = isEventMode ? 'Event' : 'Route';
+  const seatLabelLower = labels.seatLabel.toLowerCase();
+
   setPage(`
     <section class="hero">
       <div class="eyebrow">Payment</div>
@@ -505,11 +554,11 @@ function renderPayment() {
     <section class="page-card spacer-top">
       <div class="page-grid two-column">
         <div class="section">
-          <div class="meta-label">Route</div>
-          <h2>${route.from} to ${route.to}</h2>
-          <p class="helper spacer-top">Seat ${booking.seatId}</p>
+          <div class="meta-label">${routeLabel}</div>
+          <h2>${isEventMode ? `${route.from} • ${route.to}` : `${route.from} to ${route.to}`}</h2>
+          <p class="helper spacer-top">${labels.seatLabel} ${booking.seatId}</p>
           <div class="countdown">
-            <div class="meta-label">Seat hold</div>
+            <div class="meta-label">${labels.seatLabel} hold</div>
             <div class="countdown-timer" id="lock-timer">--:--</div>
             <div class="helper">Complete payment before the timer ends.</div>
           </div>
@@ -518,7 +567,7 @@ function renderPayment() {
           <h2>${money(route.price)}</h2>
           <form id="payment-form" class="feature-list spacer-top">
             <div class="field-group">
-              <label>Passenger name</label>
+              <label>${isEventMode ? 'Attendee name' : 'Passenger name'}</label>
               <input class="field" name="passengerName" required />
             </div>
             <button class="button" type="submit">Pay and confirm</button>
@@ -536,13 +585,13 @@ function renderPayment() {
     if (!booking?.expiresAt || !timerEl) return;
 
     const tick = async () => {
-      const msLeft = remainingMs(booking.expiresAt);
-      if (msLeft <= 0) {
-        clearInterval(timerId);
-        timerEl.textContent = '00:00';
-        await releaseSeatLock(booking.lockId);
-        saveBooking(null);
-        document.getElementById('payment-error').innerHTML = '<div class="alert error">Seat hold expired. Please select the seat again.</div>';
+        const msLeft = remainingMs(booking.expiresAt);
+        if (msLeft <= 0) {
+          clearInterval(timerId);
+          timerEl.textContent = '00:00';
+          await releaseSeatLock(booking.lockId);
+          saveBooking(null);
+        document.getElementById('payment-error').innerHTML = `<div class="alert error">${labels.seatLabel} hold expired. Please select the ${seatLabelLower} again.</div>`;
         navigate(`/seats?routeId=${encodeURIComponent(routeId)}`);
         return;
       }
@@ -566,7 +615,7 @@ function renderPayment() {
       if (msLeft <= 0) {
         await releaseSeatLock(booking.lockId);
         saveBooking(null);
-        paymentError.innerHTML = '<div class="alert error">Seat hold expired. Please select the seat again.</div>';
+        paymentError.innerHTML = `<div class="alert error">${labels.seatLabel} hold expired. Please select the ${seatLabelLower} again.</div>`;
         navigate(`/seats?routeId=${encodeURIComponent(routeId)}`);
         return;
       }
@@ -589,7 +638,7 @@ function renderPayment() {
         amount: Math.round(Number(order.amount || 0) * 100),
         currency: order.currency || 'INR',
         name: project.projectName || 'TATKAL',
-        description: `Seat ${booking.seatId}`,
+        description: `${labels.seatLabel} ${booking.seatId}`,
         order_id: order.orderId,
         prefill: {
           name: state.user?.name || '',
@@ -685,6 +734,7 @@ async function renderHistory() {
   try {
     const response = await api(`/booking/history?clientId=${encodeURIComponent(clientId)}`);
     const items = response.items || [];
+    const labels = getLabels();
 
     setPage(`
       <section class="hero">
@@ -698,8 +748,8 @@ async function renderHistory() {
             <table class="history-table">
               <thead>
                 <tr>
-                  <th>Route</th>
-                  <th>Seat</th>
+                  <th>${isEventMode ? 'Event' : 'Route'}</th>
+                  <th>${labels.seatLabel}</th>
                   <th>Status</th>
                   <th>Amount</th>
                 </tr>
