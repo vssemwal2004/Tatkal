@@ -3,6 +3,7 @@ const SeatLock = require('../models/SeatLock');
 const Payment = require('../models/Payment');
 const { ensureClientAccess, ensureClientActive } = require('../utils/clientAccess');
 const { acquireLock, releaseLock } = require('../utils/redisLock');
+const { sendBookingConfirmation } = require('../utils/mailer');
 
 const lockSeat = async (req, res, next) => {
   try {
@@ -166,10 +167,24 @@ const confirmBooking = async (req, res, next) => {
       throw error;
     }
 
-    return res.status(201).json({
+    const response = {
       message: 'Booking confirmed',
       bookingId: booking._id
-    });
+    };
+
+    try {
+      const recipient = req.user?.email;
+      await sendBookingConfirmation({
+        to: recipient,
+        booking,
+        routeLabel: `${confirmedLock.routeId}`,
+        seatLabel: confirmedLock.seatId
+      });
+    } catch (mailError) {
+      console.error('Booking confirmation email failed:', mailError?.message || mailError);
+    }
+
+    return res.status(201).json(response);
   } catch (error) {
     return next(error);
   }
