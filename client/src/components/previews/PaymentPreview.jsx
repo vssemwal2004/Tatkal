@@ -6,7 +6,8 @@ const buttonRadius = {
   soft: '18px'
 };
 
-const PaymentPreview = ({ config }) => {
+const PaymentPreview = ({ config, project }) => {
+  const isEvent = project?.businessType === 'event';
   const paymentOptions = [
     { id: 'upi', label: 'UPI' },
     { id: 'card', label: 'Card' },
@@ -19,7 +20,7 @@ const PaymentPreview = ({ config }) => {
       <div className="mx-auto grid max-w-5xl gap-5 lg:grid-cols-[1fr_0.9fr]">
         <div className="rounded-[30px] border border-slate-200 p-6 shadow-[0_16px_36px_rgba(15,23,42,0.06)]" style={{ backgroundColor: config.surfaceColor, color: config.textColor }}>
           <p className="text-xs uppercase tracking-[0.24em] text-slate-500">Secure checkout</p>
-          <h3 className="mt-2 text-3xl font-bold">Confirm your booking</h3>
+          <h3 className="mt-2 text-3xl font-bold">{isEvent ? 'Confirm your tickets' : 'Confirm your booking'}</h3>
           <div className="mt-6 space-y-4">
             {paymentOptions.map((option, index) => (
               <div
@@ -37,9 +38,9 @@ const PaymentPreview = ({ config }) => {
         </div>
 
         <div className="rounded-[30px] border border-slate-200 bg-white p-6 text-slate-950 shadow-[0_16px_36px_rgba(15,23,42,0.06)]">
-          <p className="text-xs uppercase tracking-[0.24em] text-slate-500">Fare summary</p>
+          <p className="text-xs uppercase tracking-[0.24em] text-slate-500">{isEvent ? 'Ticket summary' : 'Fare summary'}</p>
           <div className="mt-6 space-y-4">
-            <SummaryRow label="Base fare" value="Rs 1,240" />
+            <SummaryRow label={isEvent ? 'Ticket price' : 'Base fare'} value="Rs 1,240" />
             <SummaryRow label="Taxes" value="Rs 110" />
             <SummaryRow label="Service fee" value="Rs 40" />
           </div>

@@ -1,8 +1,27 @@
 import { ColorField, ControlSection, FileUploadField, RangeField, TextField } from '../FormPrimitives';
 
-const DashboardBuilder = ({ config, routes = [], updateRoutes, updateSection }) => (
-  <div className="space-y-5">
-    <ControlSection subtitle="Set the visual mood of the booking dashboard." title="Hero Surface">
+const DashboardBuilder = ({ config, routes = [], updateRoutes, updateSection, businessType }) => {
+  const isEvent = businessType === 'event';
+  const labels = {
+    fromLabel: isEvent ? 'City label' : 'From label',
+    toLabel: isEvent ? 'Venue label' : 'To label',
+    buttonLabel: isEvent ? 'Button label' : 'Button label',
+    catalogTitle: isEvent ? 'Event Catalog' : 'Route Catalog',
+    catalogSubtitle: isEvent
+      ? 'These events power the result cards in the generated website flow.'
+      : 'These routes power the result cards in the generated website flow.',
+    fromField: isEvent ? 'City' : 'From',
+    toField: isEvent ? 'Venue' : 'To',
+    operatorField: isEvent ? 'Organizer' : 'Operator',
+    departureField: isEvent ? 'Start time' : 'Departure',
+    arrivalField: isEvent ? 'End time' : 'Arrival',
+    priceField: isEvent ? 'Ticket price' : 'Price',
+    seatsField: isEvent ? 'Tickets Left' : 'Seats Left'
+  };
+
+  return (
+    <div className="space-y-5">
+      <ControlSection subtitle="Set the visual mood of the booking dashboard." title="Hero Surface">
       <FileUploadField
         helper="Upload a banner or ambience image for the dashboard hero."
         label="Background image"
@@ -26,32 +45,47 @@ const DashboardBuilder = ({ config, routes = [], updateRoutes, updateSection }) 
     </ControlSection>
 
     <ControlSection subtitle="Customize the dashboard search labels and CTA copy." title="Content">
-      <TextField label="From label" onChange={(fromLabel) => updateSection({ fromLabel })} placeholder="From" value={config.fromLabel} />
-      <TextField label="To label" onChange={(toLabel) => updateSection({ toLabel })} placeholder="To" value={config.toLabel} />
       <TextField
-        label="Button label"
+        label={labels.fromLabel}
+        onChange={(fromLabel) => updateSection({ fromLabel })}
+        placeholder={isEvent ? 'City' : 'From'}
+        value={config.fromLabel}
+      />
+      <TextField
+        label={labels.toLabel}
+        onChange={(toLabel) => updateSection({ toLabel })}
+        placeholder={isEvent ? 'Venue' : 'To'}
+        value={config.toLabel}
+      />
+      <TextField
+        label={labels.buttonLabel}
         onChange={(buttonLabel) => updateSection({ buttonLabel })}
-        placeholder="Search routes"
+        placeholder={isEvent ? 'Search events' : 'Search routes'}
         value={config.buttonLabel}
       />
     </ControlSection>
 
-    <ControlSection subtitle="These routes power the result cards in the generated website flow." title="Route Catalog">
+    <ControlSection subtitle={labels.catalogSubtitle} title={labels.catalogTitle}>
       <div className="space-y-3">
         {routes.map((route, index) => (
           <div key={route.id || index} className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
             <div className="grid gap-3 sm:grid-cols-2">
               <TextField
-                label="From"
+                label={labels.fromField}
                 onChange={(value) => updateRouteField(updateRoutes, index, 'from', value)}
-                placeholder="Ahmedabad"
+                placeholder={isEvent ? 'Mumbai' : 'Ahmedabad'}
                 value={route.from}
               />
-              <TextField label="To" onChange={(value) => updateRouteField(updateRoutes, index, 'to', value)} placeholder="Mumbai" value={route.to} />
               <TextField
-                label="Operator"
+                label={labels.toField}
+                onChange={(value) => updateRouteField(updateRoutes, index, 'to', value)}
+                placeholder={isEvent ? 'Stadium Night' : 'Mumbai'}
+                value={route.to}
+              />
+              <TextField
+                label={labels.operatorField}
                 onChange={(value) => updateRouteField(updateRoutes, index, 'operator', value)}
-                placeholder="Royal Express"
+                placeholder={isEvent ? 'Tatkal Live' : 'Royal Express'}
                 value={route.operator}
               />
               <TextField
@@ -61,26 +95,26 @@ const DashboardBuilder = ({ config, routes = [], updateRoutes, updateSection }) 
                 value={route.duration}
               />
               <TextField
-                label="Departure"
+                label={labels.departureField}
                 onChange={(value) => updateRouteField(updateRoutes, index, 'departure', value)}
-                placeholder="07:15"
+                placeholder={isEvent ? '18:30' : '07:15'}
                 value={route.departure}
               />
               <TextField
-                label="Arrival"
+                label={labels.arrivalField}
                 onChange={(value) => updateRouteField(updateRoutes, index, 'arrival', value)}
-                placeholder="17:45"
+                placeholder={isEvent ? '23:00' : '17:45'}
                 value={route.arrival}
               />
               <TextField
-                label="Price"
+                label={labels.priceField}
                 onChange={(value) => updateRouteField(updateRoutes, index, 'price', value)}
                 placeholder="1240"
                 type="number"
                 value={route.price}
               />
               <TextField
-                label="Seats Left"
+                label={labels.seatsField}
                 onChange={(value) => updateRouteField(updateRoutes, index, 'seatsLeft', value)}
                 placeholder="8"
                 type="number"
@@ -91,8 +125,9 @@ const DashboardBuilder = ({ config, routes = [], updateRoutes, updateSection }) 
         ))}
       </div>
     </ControlSection>
-  </div>
-);
+    </div>
+  );
+};
 
 const updateRouteField = (updateRoutes, index, field, value) => {
   if (!updateRoutes) {
